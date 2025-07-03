@@ -4,6 +4,7 @@ import crypto from "crypto";
 import canonicalize from "canonicalize";
 import { keyClean } from "./tools/keyCleaner";
 import fetch from "node-fetch"; // npm install node-fetch if needed
+import { Record } from "./services/v1/recordService";
 
 const previous_hash = process.argv[2];
 const scope = process.argv[3];
@@ -13,6 +14,8 @@ const jsonFile = process.argv[6];
 const protocol = "v1";
 
 // 1. Load keys
+if (!fs.existsSync(`/secrets/${keyFile}.key`)) throw new Error("Key not found");
+
 const privateKeyPem = fs.readFileSync(`/secrets/${keyFile}.key`, "utf8");
 const passphrase = process.env.PASSKEY;
 
@@ -22,7 +25,9 @@ const privateKey = {
 };
 
 const publicKeyObj = crypto.createPublicKey(privateKeyPem);
-const publicKeyPem = publicKeyObj.export({ type: "spki", format: "pem" });
+const publicKeyPem = keyClean(
+    publicKeyObj.export({ type: "spki", format: "pem" })
+);
 const publicKeyHash = crypto
     .createHash("sha256")
     .update(publicKeyPem)
@@ -41,43 +46,14 @@ const record = {
     data,
 };
 
-// 4. Canonicalize and sign
-const canonical = canonicalize(record);
-if (!canonical) throw new Error("Failed to canonicalize record");
-
-const signer = crypto.createSign("sha256");
-signer.update(canonical);
-signer.end();
-
-const signature = signer.sign(
-    {
-        key: privateKey,
-        passphrase: process.env.PASSKEY,
-    },
-    "base64"
-);
-
-// 5. Add hashes
-const recordWithSig = {
-    ...record,
-    signature,
-};
-
-const current_hash = crypto
-    .createHash("sha256")
-    .update(canonicalize(recordWithSig))
-    .digest("base64");
-
-// 6. Final record
-const finalRecord = {
-    ...recordWithSig,
-    current_hash,
-    public_key: keyClean(publicKeyPem),
-};
+const finalRecord = await Record.sign(record, keyFile);
 
 // 7. Submit to HodeauxLedger API
 const submit = async () => {
-    const response = await fetch("http://api.hodeauxledger.org/v1/append", {
+    console.log("Submitting record to HodeauxLedger API...");
+    console.dir(finalRecord, { depth: null });
+    return;
+    const response = await fetch("http://steward.hodeauxledger.org/v1/append", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

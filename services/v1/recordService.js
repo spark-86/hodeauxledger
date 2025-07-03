@@ -5,6 +5,8 @@ import fs from "fs";
 import { generateBase32, hex2base32 } from "../../tools/base32.js";
 import { Keyring } from "./keyringService.js";
 import { keyFormat } from "../../tools/keyCleaner.js";
+import { BlockGenesis } from "./blockGenesisService.js";
+import { BlockRoot } from "./blockRootService.js";
 
 const recordTable = "records";
 const ledgerPath = process.env.LEDGER_PATH || "/ledger";
@@ -57,6 +59,10 @@ export const Record = {
             `${ledgerPath}/lastHash_${data.scope}.txt`,
             createRecord.current_hash
         );
+
+        // Process what we are supposed to do for this specific
+        // type of record.
+        await this.processRecord(createRecord);
 
         await this.addToDb(createRecord);
         fs.unlinkSync("lockfile.txt");
@@ -129,5 +135,70 @@ export const Record = {
             .digest("base64");
     },
 
-    async processRecord(record) {},
+    async processRecord(record) {
+        switch (record.record_type.split(":")[0].toLowerCase()) {
+            case "genesis":
+                await BlockGenesis.execute(record);
+                break;
+            case "root":
+                await BlockRoot.execute(record);
+                break;
+            case "scope":
+            case "issuing":
+                break;
+            case "agent":
+                break;
+            default:
+                break;
+        }
+    },
+
+    async sign(data, keyName) {
+        if (!data.previous_hash) {
+            throw new Error("No previous hash provided");
+        }
+        if (!data.record_type) {
+            throw new Error("No record type provided");
+        }
+        const protocol = data.protocol || "v1";
+        const scope = data.scope || "";
+        const key = data.key || "";
+        const record_type = data.record_type || "";
+        const dataObject = data.data;
+
+        const recordToHash = {
+            previous_hash: data.previous_hash,
+            protocol,
+            scope,
+            key,
+            record_type,
+            data: dataObject,
+        };
+
+        const recordHash = this.hash(
+            JSON.stringify(canonicalize(recordToHash))
+        );
+
+        const signature = crypto.createSign("sha256");
+        signature.update(recordHash);
+        signature.end();
+
+        const privateKeyFile = fs.readFileSync(
+            `/secrets/${keyName}.key`,
+            "utf8"
+        );
+        const privateKey = {
+            key: privateKeyFile,
+            passphrase: await Keyring.getRSAPassphrase(),
+        };
+
+        const signatureBuffer = signature.sign(privateKey, "base64");
+
+        const outRecord = {
+            ...recordToHash,
+            signature: signatureBuffer,
+        };
+
+        return outRecord;
+    },
 };

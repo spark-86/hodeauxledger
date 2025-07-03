@@ -131,7 +131,6 @@ export const Keyring = {
             },
             signature: signature,
             key: keyHash,
-            previous_hash: "",
         };
 
         fs.writeFileSync("/secrets/hodeaux.key", privateKey);

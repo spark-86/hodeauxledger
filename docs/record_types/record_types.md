@@ -1,6 +1,6 @@
 # HodeauxLedger record_type explained
 
-## Record Structure
+## Record Structure (v1 Protocol)
 
 at is added at creation.
 
@@ -9,14 +9,19 @@ at is added at creation.
     "previous_hash": "asd9f0we...",
     "protocol": "v1",
     "scope": "ledger:1000d2ddssxxxcc...",
+    "at": 175998234923, // provided by server
     "key": "953554ae02fbdbb0b024af9893af...",
     "record_type": "root:add",
     "data": {
         "sampleData": "Sample Text"
     },
     "signature": "6908e9300d63feb9b77593a5edb8822d..."
+    "current_hash": "asd9f0we..." // provided by server
+
 }
 ```
+
+Signature is a signature of previous_hash, protocol, scope, key, record_type and data.
 
 ## `genesis`
 
