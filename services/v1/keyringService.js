@@ -23,53 +23,6 @@ export const Keyring = {
         return masterKey;
     },
 
-    async buildRootAuthorities() {
-        const rootAuthorities = [];
-
-        const genesis = await db(recordTable)
-            .where({ record_type: "genesis" })
-            .first();
-        if (!genesis) {
-            throw new Error("Genesis record not found");
-        }
-
-        const rootRecords = await db(recordTable).where(
-            "record_type",
-            "like",
-            "root:%"
-        );
-
-        for (const rootRecord of rootRecords) {
-            if (rootRecord.record_type === "root:add") {
-                const { data, signature } = rootRecord;
-                const canonical = canonicalize(data);
-
-                // Load public key from record
-                const publicKeyPem = data?.key;
-                if (!publicKeyPem) {
-                    throw new Error("Missing public key in root:add payload");
-                }
-
-                const verify = crypto.createVerify("sha256");
-                verify.update(canonical);
-                verify.end();
-
-                const signatureBuf = Buffer.from(signature, "base64");
-
-                const verified = verify.verify(publicKeyPem, signatureBuf);
-                if (!verified) {
-                    throw new Error(
-                        "Root record signature verification failed"
-                    );
-                }
-
-                rootAuthorities.push(publicKeyPem);
-            }
-        }
-
-        return rootAuthorities;
-    },
-
     async genesis() {
         if (fs.existsSync(ledgerPath + "/genesis.json", fs.constants.F_OK)) {
             return JSON.parse(
