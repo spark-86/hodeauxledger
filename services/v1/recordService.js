@@ -179,6 +179,8 @@ export const Record = {
             JSON.stringify(canonicalize(recordToHash))
         );
 
+        console.log(recordHash);
+
         const signature = crypto.createSign("sha256");
         signature.update(recordHash);
         signature.end();
