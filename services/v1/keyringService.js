@@ -60,10 +60,10 @@ export const Keyring = {
             data: payload,
         };
 
-        const genesisRecord = await Record.sign(recordToSign, "hodeaux");
-
         fs.writeFileSync("/secrets/hodeaux.key", privateKey);
         fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
+        const genesisRecord = await Record.sign(recordToSign, "hodeaux");
+
         await Record.create(genesisRecord);
 
         return {
