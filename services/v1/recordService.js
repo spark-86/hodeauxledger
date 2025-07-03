@@ -154,7 +154,7 @@ export const Record = {
     },
 
     async sign(data, keyName) {
-        if (!data.previous_hash) {
+        if (!data.previous_hash && data.record_type !== "genesis") {
             throw new Error("No previous hash provided");
         }
         if (!data.record_type) {
