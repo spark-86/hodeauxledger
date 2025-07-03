@@ -31,6 +31,7 @@ export const Keyring = {
             );
         }
 
+        console.log("Generating keys...");
         const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
             modulusLength: 4096,
             publicKeyEncoding: {
@@ -44,8 +45,6 @@ export const Keyring = {
                 passphrase: process.env.PASSKEY,
             },
         });
-
-        console.log(publicKey);
 
         const payload = {
             name: "HodeauxLedger Core Trust",
