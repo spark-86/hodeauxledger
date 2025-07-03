@@ -23,7 +23,10 @@ export const Record = {
                 "utf8"
             );
 
-        if (!lastHash || lastHash.length !== 44) {
+        if (
+            (!lastHash || lastHash.length !== 44) &&
+            data.record_type !== "genesis"
+        ) {
             throw new Error("Last hash not found");
         }
         if (lastHash !== data.previous_hash) {
