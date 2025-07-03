@@ -14,7 +14,7 @@ const ledgerPath = process.env.LEDGER_PATH || "/ledger";
 export const Record = {
     async create(data) {
         if (fs.existsSync("lockfile.txt")) throw new Error("Ledger is locked");
-        fs.writeFileSync("lockfile.txt");
+        fs.writeFileSync("lockfile.txt", "Locked");
 
         const lastHash = fs.readFileSync(
             `${ledgerPath}/lastHash_${data.scope}.txt`,
