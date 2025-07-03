@@ -1,7 +1,7 @@
 export const keyClean = (key) => {
     return key
-        .replace("-----BEGIN PRIVATE KEY-----", "")
-        .replace("-----END PRIVATE KEY-----", "")
+        .replace("-----BEGIN PUBLIC KEY-----", "")
+        .replace("-----END PUBLIC KEY-----", "")
         .replaceAll("\n", "");
 };
 
