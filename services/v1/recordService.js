@@ -16,10 +16,12 @@ export const Record = {
         if (fs.existsSync("lockfile.txt")) throw new Error("Ledger is locked");
         fs.writeFileSync("lockfile.txt", "Locked");
 
-        const lastHash = fs.readFileSync(
-            `${ledgerPath}/lastHash_${data.scope}.txt`,
-            "utf8"
-        );
+        let lastHash = "";
+        if (data.previous_hash)
+            lastHash = fs.readFileSync(
+                `${ledgerPath}/lastHash_${data.scope}.txt`,
+                "utf8"
+            );
 
         if (!lastHash || lastHash.length !== 44) {
             throw new Error("Last hash not found");
