@@ -1,0 +1,29 @@
+{
+  "name": "hodeauxledger",
+  "version": "1.0.0",
+  "description": "Open Source Trust Based Ledger System",
+  "homepage": "https://github.com/spark-86/hodeauxledger#readme",
+  "bugs": {
+    "url": "https://github.com/spark-86/hodeauxledger/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spark-86/hodeauxledger.git"
+  },
+  "license": "ISC",
+  "author": "Veronica Hodo <veronica@veronicahodo.com>",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "canonicalize": "^2.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "knex": "^3.1.0",
+    "mysql2": "^3.14.1"
+  }
+}
