@@ -94,44 +94,20 @@ export const Keyring = {
         console.log(publicKey);
 
         const payload = {
-            name: "Hodeaux Trust Core",
+            name: "HodeauxLedger Core Trust",
             key: keyClean(publicKey),
         };
 
-        const canonical = canonicalize(payload);
-        const signer = crypto.createSign("sha256");
-        signer.update(canonical);
-        signer.end();
-
-        const signature = signer.sign(
-            {
-                key: privateKey,
-                passphrase: process.env.PASSKEY,
-            },
-            "base64"
-        );
-        const sigHash = crypto
-            .createHash("sha256")
-            .update(signature)
-            .digest("base64");
-
-        const keyHash = crypto
-            .createHash("sha256")
-            .update(publicKey)
-            .digest("base64");
-
-        const genesisRecord = {
+        const recordToSign = {
             previous_hash: "",
             protocol: "v1",
-            scope: "genesis",
+            scope: "",
             at: Date.now(),
             record_type: "genesis",
-            data: {
-                ...payload,
-            },
-            signature: signature,
-            key: keyHash,
+            data: payload,
         };
+
+        const genesisRecord = await Record.sign(recordToSign, "hodeaux");
 
         fs.writeFileSync("/secrets/hodeaux.key", privateKey);
         fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
