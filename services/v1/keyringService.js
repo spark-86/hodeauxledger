@@ -24,6 +24,7 @@ export const Keyring = {
     },
 
     async genesis() {
+        console.log("Generating genesis record...");
         if (fs.existsSync(ledgerPath + "/genesis.json", fs.constants.F_OK)) {
             return JSON.parse(
                 fs.readFileSync(ledgerPath + "/genesis.json", "utf8")
@@ -55,15 +56,16 @@ export const Keyring = {
             previous_hash: "",
             protocol: "v1",
             scope: "",
-            at: Date.now(),
             record_type: "genesis",
             data: payload,
         };
-
+        console.log(
+            "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"
+        );
         fs.writeFileSync("/secrets/hodeaux.key", privateKey);
         fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
+        console.log("Writing genesis record to /ledger/genesis.json");
         const genesisRecord = await Record.sign(recordToSign, "hodeaux");
-
         await Record.create(genesisRecord);
 
         return {
