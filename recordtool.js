@@ -1,9 +1,9 @@
 import fs from "fs";
 import crypto from "crypto";
 import canonicalize from "canonicalize";
-import { keyClean } from "./tools/keyCleaner";
+import { keyClean } from "./tools/keyCleaner.js";
 import fetch from "node-fetch"; // npm install node-fetch if needed
-import { Record } from "./services/v1/recordService";
+import { Record } from "./services/v1/recordService.js";
 
 const previous_hash = process.argv[2];
 const scope = process.argv[3];
