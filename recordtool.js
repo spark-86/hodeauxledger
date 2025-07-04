@@ -18,6 +18,7 @@ program
     .requiredOption("-j, --json <file>", "JSON file to submit as data")
     .option("-p, --previous <hash>", "Previous hash (required unless genesis)")
     .option("--passkey <envVar>", "Passphrase for the private key")
+    .option("--hashonly", "Only hash the record without submitting it")
     .option(
         "--endpoint <url>",
         "API endpoint",
@@ -36,7 +37,23 @@ async function main() {
         previous: previous_hash = "",
         passkey,
         endpoint,
+        hashonly,
     } = options;
+
+    let prevHash;
+    try {
+        const res = await axios.get(
+            `http://steward.hodeauxledger.org/v1/get/${scope}`
+        );
+        prevHash = res.data;
+        console.log("Previous hash:", prevHash);
+    } catch (err) {
+        if (err.response.status === 404) {
+            throw new Error(`Scope not found: ${scope}`);
+        } else {
+            throw err;
+        }
+    }
 
     const protocol = "v1";
     const passphrase = passkey || process.env.PASSKEY;
@@ -78,22 +95,24 @@ async function main() {
 
     const signedRecord = await Record.sign(record, keyFile);
 
-    // 4. Submit
-    console.log("📤 Submitting record to HodeauxLedger API...");
-    try {
-        const res = await axios.post(endpoint, signedRecord);
-        console.log("✅ Record submitted successfully:");
-        console.dir(res.data, { depth: null });
-        process.exit(0);
-    } catch (err) {
-        console.error("❌ Error submitting record:");
-        if (err.response) {
-            console.error("Status:", err.response.status);
-            console.error("Data:", err.response.data);
-        } else {
-            console.error(err.message);
+    if (hashonly) {
+        // 4. Submit
+        console.log("📤 Submitting record to HodeauxLedger API...");
+        try {
+            const res = await axios.post(endpoint, signedRecord);
+            console.log("✅ Record submitted successfully:");
+            console.dir(res.data, { depth: null });
+            process.exit(0);
+        } catch (err) {
+            console.error("❌ Error submitting record:");
+            if (err.response) {
+                console.error("Status:", err.response.status);
+                console.error("Data:", err.response.data);
+            } else {
+                console.error(err.message);
+            }
+            process.exit(1);
         }
-        process.exit(1);
     }
 }
 
