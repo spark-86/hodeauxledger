@@ -82,10 +82,15 @@ export const Record = {
     async verify(data) {
         // 1. Verify record hash
         const providedHash = data.current_hash;
+        if (!providedHash) {
+            throw new Error("No hash provided");
+        }
+
         const copy = { ...data };
         delete copy.current_hash;
 
         const calculatedHash = this.hash(canonicalize(copy));
+        console.log(providedHash, calculatedHash);
         if (providedHash !== calculatedHash) {
             throw new Error("Hash verification failed");
         }
