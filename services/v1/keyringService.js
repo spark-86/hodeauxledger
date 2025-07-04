@@ -164,6 +164,7 @@ export const Keyring = {
             key,
             key_hash,
         });
+        console.log(`Key added to keyring: ${key_hash} [${type}]`);
     },
 
     async ringUpdate(oldKeyHash, type, newKey) {
