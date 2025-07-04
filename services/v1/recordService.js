@@ -180,10 +180,8 @@ export const Record = {
             data: dataObject,
         };
 
-        const recordHash = await this.hash(canonicalize(recordToHash));
-
         const signature = crypto.createSign("sha256");
-        signature.update(recordHash);
+        signature.update(canonicalize(recordToHash));
         signature.end();
 
         const privateKeyFile = fs.readFileSync(
