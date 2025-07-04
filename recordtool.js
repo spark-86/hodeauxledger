@@ -95,7 +95,7 @@ async function main() {
 
     const signedRecord = await Record.sign(record, keyFile);
 
-    if (hashonly) {
+    if (!hashonly) {
         // 4. Submit
         console.log("📤 Submitting record to HodeauxLedger API...");
         try {
