@@ -17,11 +17,18 @@ export const Record = {
         fs.writeFileSync("lockfile.txt", "Locked");
 
         let lastHash = "";
-        if (data.previous_hash)
+        if (data.previous_hash) {
+            const scopeExists = fs.existsSync(
+                `${ledgerPath}/lastHash_${data.scope}.txt`
+            );
+            if (!scopeExists) {
+                throw new Error("Scope not found");
+            }
             lastHash = fs.readFileSync(
                 `${ledgerPath}/lastHash_${data.scope}.txt`,
                 "utf8"
             );
+        }
 
         if (
             (!lastHash || lastHash.length !== 44) &&
