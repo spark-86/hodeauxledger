@@ -51,12 +51,18 @@ export const Keyring = {
             key: keyClean(publicKey),
         };
 
+        const key_hash = crypto
+            .createHash("sha256")
+            .update(publicKey)
+            .digest("base64");
+
         const recordToSign = {
             previous_hash: "",
             protocol: "v1",
             scope: "",
             record_type: "genesis",
             data: payload,
+            key: key_hash,
         };
         console.log(
             "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"

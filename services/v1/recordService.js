@@ -67,7 +67,10 @@ export const Record = {
 
         // Process what we are supposed to do for this specific
         // type of record.
-        await this.processRecord(createRecord);
+        await this.processRecord({
+            ...createRecord,
+            data: JSON.parse(createRecord.data),
+        });
 
         await this.addToDb(createRecord);
         fs.unlinkSync("lockfile.txt");
