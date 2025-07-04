@@ -35,6 +35,8 @@ export const Startup = {
             publicKey.export({ format: "pem", type: "spki" })
         );
 
+        // FIXME: We don't have to keep the private key on the server,
+        // so like we shouldn't. Just load the public.
         if (keyClean(genesis.data.key) !== publicKeyString)
             throw new Error("Genesis record does not match master key");
         await Log.log("start", "ledger", "Ledger building from disk", "", "");
@@ -54,7 +56,15 @@ export const Startup = {
                         "utf8"
                     )
                 );
+                const verified = await Record.verify(block);
+                if (!verified) {
+                    throw new Error(
+                        "Record verification failed on record " +
+                            block.previous_hash
+                    );
+                }
                 await Record.processRecord(block);
+
                 // convert current_hash to base16 from base64
                 const hex = Buffer.from(block.current_hash, "base64").toString(
                     "hex"
