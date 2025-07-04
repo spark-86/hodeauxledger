@@ -80,10 +80,14 @@ export const Keyring = {
             .split("\n");
         for (const record of initialRecords) {
             const signedRecord = await Record.sign(
-                JSON.parse(record),
+                {
+                    ...JSON.parse(record),
+                    previous_hash: hash,
+                },
                 "hodeaux"
             );
-            await Record.create(signedRecord);
+            const finalRecord = await Record.create(signedRecord);
+            hash = finalRecord.current_hash;
         }
         return genesisRecord;
 
