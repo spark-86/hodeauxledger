@@ -175,7 +175,7 @@ export const Record = {
         const scope = data.scope || "";
         const key = data.key || "";
         const record_type = data.record_type || "";
-        const dataObject = JSON.stringify(canonicalize(data.data));
+        const dataObject = canonicalize(data.data);
 
         const recordToHash = {
             previous_hash: data.previous_hash,
