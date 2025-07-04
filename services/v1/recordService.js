@@ -89,7 +89,7 @@ export const Record = {
         const copy = { ...data };
         delete copy.current_hash;
 
-        const calculatedHash = this.hash(canonicalize(copy));
+        const calculatedHash = await this.hash(canonicalize(copy));
         console.log(providedHash, calculatedHash);
         if (providedHash !== calculatedHash) {
             throw new Error("Hash verification failed");
