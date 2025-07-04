@@ -1,6 +1,7 @@
 import canonicalize from "canonicalize";
 import crypto from "crypto";
 import { Record } from "../../services/v1/recordService.js";
+import { Keyring } from "../../services/v1/keyringService.js";
 
 export const postAppend = async (req, res) => {
     const {
