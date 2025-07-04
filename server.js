@@ -10,6 +10,7 @@ import { Startup } from "./services/v1/startupServices.js";
 import { Record } from "./services/v1/recordService.js";
 
 import appendRoutes from "./routes/v1/appendRoutes.js";
+import getRoutes from "./routes/v1/getRoutes.js";
 import systemRoutes from "./routes/v1/systemRoutes.js";
 import readRoutes from "./routes/v1/readRoutes.js";
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/v1/append", appendRoutes);
+app.use("/v1/get", getRoutes);
 app.use("/v1/system", systemRoutes);
 app.use("/v1/read", readRoutes);
 
