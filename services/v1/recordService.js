@@ -88,7 +88,7 @@ export const Record = {
         const copy = { ...data };
         delete copy.current_hash;
 
-        const calculatedHash = this.hash(JSON.stringify(canonicalize(copy)));
+        const calculatedHash = this.hash(canonicalize(copy));
         if (providedHash !== calculatedHash) {
             throw new Error("Hash verification failed");
         }
