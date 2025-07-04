@@ -85,7 +85,7 @@ async function main() {
 
     // 3. Build and sign record
     const record = {
-        previous_hash: prevHash,
+        previous_hash: prevHash.data,
         protocol,
         scope,
         key: publicKeyHash,
