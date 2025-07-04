@@ -79,7 +79,7 @@ export const Record = {
 
         await this.addToDb(createRecord);
         fs.unlinkSync("lockfile.txt");
-        return data.id;
+        return createRecord;
     },
 
     async addToDb(data) {

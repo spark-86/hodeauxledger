@@ -20,7 +20,7 @@ export const Startup = {
         const genesis = JSON.parse(
             fs.readFileSync(ledgerPath + "/genesis.json", "utf8")
         );
-        const masterKey = fs.readFileSync("/secrets/hodeaux.key", "utf8");
+        /*const masterKey = fs.readFileSync("/secrets/hodeaux.key", "utf8");
 
         // Generate a public key from masterKey and see if matches genesis
         const publicKey = crypto.createPublicKey({
@@ -29,10 +29,10 @@ export const Startup = {
             type: "pkcs8",
             cipher: "aes-256-cbc",
             passphrase: process.env.PASSKEY,
-        });
+        }); */
 
         const publicKeyString = keyClean(
-            publicKey.export({ format: "pem", type: "spki" })
+            fs.readFileSync("/secrets/hodeaux.pub", "utf8")
         );
 
         // FIXME: We don't have to keep the private key on the server,

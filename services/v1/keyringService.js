@@ -73,6 +73,20 @@ export const Keyring = {
         const genesisRecord = await Record.sign(recordToSign, "hodeaux");
         await Record.create(genesisRecord);
 
+        // load from "genesis_records.jsonl" and sign them all
+        let hash = genesisRecord.current_hash;
+        const initialRecords = fs
+            .readFileSync("genesis_records.jsonl", "utf8")
+            .split("\n");
+        for (const record of initialRecords) {
+            const signedRecord = await Record.sign(
+                JSON.parse(record),
+                "hodeaux"
+            );
+            await Record.create(signedRecord);
+        }
+        return genesisRecord;
+
         return {
             publicKey,
             privateKey,
