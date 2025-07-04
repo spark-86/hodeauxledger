@@ -46,6 +46,9 @@ export const Startup = {
             new Buffer.from(genesis.current_hash, "base64").toString("hex")
         );
 
+        if (!(await Record.verify(genesis))) {
+            throw new Error("Genesis record verification failed");
+        }
         await Record.processRecord(genesis);
 
         while (!done) {
