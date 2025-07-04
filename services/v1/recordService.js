@@ -83,8 +83,6 @@ export const Record = {
         const providedHash = data.current_hash;
         const copy = { ...data };
         delete copy.current_hash;
-        delete copy.signature;
-        delete copy.at;
 
         const calculatedHash = this.hash(JSON.stringify(canonicalize(copy)));
         if (providedHash !== calculatedHash) {
@@ -172,7 +170,7 @@ export const Record = {
         const scope = data.scope || "";
         const key = data.key || "";
         const record_type = data.record_type || "";
-        const dataObject = data.data;
+        const dataObject = JSON.stringify(canonicalize(data.data));
 
         const recordToHash = {
             previous_hash: data.previous_hash,
@@ -183,9 +181,7 @@ export const Record = {
             data: dataObject,
         };
 
-        const recordHash = await this.hash(
-            JSON.stringify(canonicalize(recordToHash))
-        );
+        const recordHash = await this.hash(canonicalize(recordToHash));
 
         const signature = crypto.createSign("sha256");
         signature.update(recordHash);
