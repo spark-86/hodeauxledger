@@ -146,7 +146,7 @@ export const Record = {
 
     async processRecord(record) {
         console.log("Processing record type:", record.record_type);
-        console.log(record.data);
+        //console.log(record.data);
         switch (record.record_type.split(":")[0].toLowerCase()) {
             case "genesis":
                 await BlockGenesis.execute(record);
