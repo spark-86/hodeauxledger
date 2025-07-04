@@ -25,7 +25,8 @@ app.use("/v1/get", getRoutes);
 app.use("/v1/system", systemRoutes);
 app.use("/v1/read", readRoutes);
 
-app.use((_, res) => {
+app.use((req, res) => {
+    Log.warn("ROUTER", req.originalUrl + " not found", "", req.ip);
     res.status(404).json({ error: "Not found" });
 });
 
