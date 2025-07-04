@@ -46,7 +46,7 @@ async function main() {
             `http://steward.hodeauxledger.org/v1/get/${scope}`
         );
         prevHash = res.data;
-        console.log("Previous hash:", prevHash);
+        console.log("Previous hash:", prevHash.data);
     } catch (err) {
         if (err.response.status === 404) {
             throw new Error(`Scope not found: ${scope}`);
@@ -85,7 +85,7 @@ async function main() {
 
     // 3. Build and sign record
     const record = {
-        previous_hash,
+        prevHash,
         protocol,
         scope,
         key: publicKeyHash,
