@@ -175,7 +175,7 @@ export const Record = {
         const scope = data.scope || "";
         const key = data.key || "";
         const record_type = data.record_type || "";
-        const dataObject = canonicalize(data.data);
+        const dataObject = data.data;
 
         const recordToHash = {
             previous_hash: data.previous_hash,
@@ -185,8 +185,6 @@ export const Record = {
             record_type,
             data: dataObject,
         };
-
-        console.dir(recordToHash, { depth: null });
 
         const recordHash = await this.hash(canonicalize(recordToHash));
 
