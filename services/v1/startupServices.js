@@ -67,12 +67,13 @@ export const Startup = {
     },
 
     async processBlock(data) {
-        console.dir(data, { depth: null });
+        //console.dir(data, { depth: null });
 
         const verified = await Record.verify(data);
         if (!verified) {
             throw new Error("Record verification failed");
         }
+        console.log("Verified record", data.previous_hash);
 
         switch (data.record_type) {
             case "genesis":
