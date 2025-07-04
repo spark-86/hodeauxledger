@@ -186,6 +186,8 @@ export const Record = {
             data: dataObject,
         };
 
+        console.dir(recordToHash, { depth: null });
+
         const recordHash = await this.hash(canonicalize(recordToHash));
 
         const signature = crypto.createSign("sha256");

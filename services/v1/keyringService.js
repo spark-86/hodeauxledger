@@ -64,7 +64,6 @@ export const Keyring = {
             data: payload,
             key: key_hash,
         };
-        console.dir(recordToSign, { depth: null });
         console.log(
             "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"
         );
