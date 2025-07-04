@@ -13,8 +13,8 @@ export const validateAppend = [
         .withMessage("scope is required")
         .isString()
         .withMessage("scope must be a string")
-        .isLength({ min: 1, max: 255 })
-        .withMessage("scope must be between 1 and 255 characters long"),
+        .isLength({ min: 0, max: 255 })
+        .withMessage("scope must be between 0 and 255 characters long"),
     body("protocol")
         .exists()
         .withMessage("protocol is required")
