@@ -13,6 +13,6 @@ export const BlockScope = {
         }
     },
     async create(record) {
-        // TODO: create a new ledger
+        console.log("Creating scope:", record.data.scope);
     },
 };
