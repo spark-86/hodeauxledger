@@ -71,10 +71,10 @@ export const Keyring = {
         fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
         console.log("Writing genesis record to /ledger/genesis.json");
         const genesisRecord = await Record.sign(recordToSign, "hodeaux");
-        await Record.create(genesisRecord);
+        const genesisComplete = await Record.create(genesisRecord);
 
         // load from "genesis_records.jsonl" and sign them all
-        let hash = genesisRecord.current_hash;
+        let hash = genesisComplete.current_hash;
         const initialRecords = fs
             .readFileSync("genesis_records.jsonl", "utf8")
             .split("\n");
