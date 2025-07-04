@@ -135,10 +135,7 @@ export const Record = {
     },
 
     async hash(data) {
-        return crypto
-            .createHash("sha256")
-            .update(canonicalize(data))
-            .digest("base64");
+        return crypto.createHash("sha256").update(data).digest("base64");
     },
 
     async processRecord(record) {
