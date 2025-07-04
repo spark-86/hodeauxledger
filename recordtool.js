@@ -1,4 +1,3 @@
-import { Keyring } from "./services/v1/keyringService";
 import fs from "fs";
 import crypto from "crypto";
 import canonicalize from "canonicalize";
