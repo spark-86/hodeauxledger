@@ -35,6 +35,19 @@ const publicKeyHash = crypto
 const data = JSON.parse(fs.readFileSync(jsonFile, "utf8"));
 
 // 3. Build canonical record
+
+console.dir(
+    {
+        previous_hash,
+        protocol,
+        scope,
+        key: publicKeyHash,
+        record_type: recordType,
+        data,
+    },
+    { depth: null }
+);
+
 const record = {
     previous_hash,
     protocol,
