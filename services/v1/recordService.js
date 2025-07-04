@@ -43,7 +43,7 @@ export const Record = {
             data: data.data,
             signature: data.signature,
         };
-        createRecord.current_hash = await this.hash(createRecord);
+        createRecord.current_hash = await this.hash(canonicalize(createRecord));
 
         if (createRecord.previous_hash) {
             fs.writeFileSync(
