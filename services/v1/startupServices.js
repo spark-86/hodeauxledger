@@ -50,6 +50,7 @@ export const Startup = {
             throw new Error("Genesis record verification failed");
         }
         await Record.processRecord(genesis);
+        await Record.addToDb(genesis);
 
         while (!done) {
             if (fs.existsSync(ledgerPath + "/" + currentHash + ".json")) {
@@ -67,6 +68,7 @@ export const Startup = {
                     );
                 }
                 await Record.processRecord(block);
+                await Record.addToDb(block);
 
                 // convert current_hash to base16 from base64
                 const hex = Buffer.from(block.current_hash, "base64").toString(
