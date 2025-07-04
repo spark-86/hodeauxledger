@@ -18,7 +18,7 @@ export const BlockRoot = {
             default:
         }
 
-        await Keyring.ringAdd("root", keyClean(record.data.key));
+        await Keyring.ringAdd("root", keyClean(record.data.key, record.at, 0));
     },
 
     async add(record) {

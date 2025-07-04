@@ -9,6 +9,6 @@ const keyPath = process.env.KEY_PATH || "/secrets";
 export const BlockGenesis = {
     async execute(record) {
         console.log("Setting core key: " + record.data.key);
-        await Keyring.ringAdd("core", record.data.key);
+        await Keyring.ringAdd("core", record.data.key, record.at, 0);
     },
 };

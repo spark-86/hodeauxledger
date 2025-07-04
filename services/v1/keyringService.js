@@ -79,81 +79,7 @@ export const Keyring = {
         };
     },
 
-    async addRootAuthority(name, key, previous_hash) {
-        // 1. Canonicalize payload
-        const canonical = canonicalize({
-            name,
-            key,
-        });
-
-        // 2. Load master key (private key from secure file)
-        const masterPrivateKey = crypto.createPrivateKey({
-            key: await this.getMaster(),
-            format: "pem",
-            type: "pkcs8",
-            cipher: "aes-256-cbc",
-            passphrase: await this.getRSAPassphrase(),
-        });
-
-        const signer = crypto.createSign("sha256");
-        signer.update(canonical);
-        signer.end();
-
-        // 3. Sign the payload with the master key
-        const signature = signer.sign(
-            {
-                key: masterPrivateKey,
-                passphrase: await this.getRSAPassphrase(),
-            },
-            "base64"
-        );
-
-        // 4. Hash the signature for optional integrity tagging
-        const sigHash = crypto
-            .createHash("sha256")
-            .update(signature)
-            .digest("base64");
-
-        // 5. Hash the master public key
-        const masterPublicKey = crypto.createPublicKey(masterPrivateKey);
-
-        const keyHash = crypto
-            .createHash("sha256")
-            .update(
-                masterPublicKey
-                    .export({ format: "pem", type: "spki" })
-                    .replace("-----BEGIN PUBLIC KEY-----\n", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replace("\n", "")
-            )
-            .digest("base64");
-
-        // 6. Create record
-        const rootRecord = {
-            previous_hash,
-            protocol: "v1",
-            scope: "",
-            at: Date.now(),
-            record_type: "root:add",
-            data: data, // raw data (not canonicalized string)
-            signature: sigHash,
-            key: keyHash,
-            previous_hash,
-        };
-
-        rootRecord.current_hash = crypto
-            .createHash("sha256")
-            .update(JSON.stringify(rootRecord))
-            .digest("base64");
-
-        await Record.create(rootRecord);
-
-        return rootRecord;
-    },
-
-    async addIssuingAuthority(data) {},
-
-    async ringAdd(type, key) {
+    async ringAdd(type, key, issued = 0, exp = 0) {
         const key_hash = crypto
             .createHash("sha256")
             .update(key)
@@ -163,6 +89,8 @@ export const Keyring = {
             key_type: type,
             key,
             key_hash,
+            issued: issued ? issued : Date.now(),
+            exp: exp ? exp : 0,
         });
         console.log(`Key added to keyring: ${key_hash} [${type}]`);
     },

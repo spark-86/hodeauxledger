@@ -27,9 +27,28 @@ Signature is a signature of previous_hash, protocol, scope, key, record_type and
 
 One per entire master ledger. Sets up the master authority key. This is the key used to create Root Authorities, those capabile of adding new sub-ledgers.
 
+```json
+{
+    "data": {
+        "name": "HodeauxLedger Core Trust",
+        "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCA..."
+    }
+}
+```
+
 ## `root:add`
 
 Adds a Root Authority. data can contain metadata about said Root Authority.
+
+```json
+{
+    "data": {
+        "name": "Test Company Ledger Steward",
+        "host": "steward.testcompany.com",
+        "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCA..."
+    }
+}
+```
 
 ## `root:update`
 
@@ -38,7 +57,8 @@ Updates a Root Authority. data can contain metadata about said Root Authority.
 ```json
 {
     "data": {
-        "name": "NuTest Authority"
+        "name": "NuTest Ledger Steward",
+        "host": "nusteward.testcompany.com"
     }
 }
 ```
@@ -50,19 +70,20 @@ Revokes a Root Authority. data contains the key hash of the Root Authority to re
 ```json
 {
     "data": {
-        "key": "953554ae02fbdbb0b024af9893afead1ff865f48ffd07b5170080fbef42471c076d10108cf68560370a71d7358da1cebe69fa4ec90acc550a8f2d4f02edeb49c"
+        "key_hash": "fFtWEASxnCOgq7JVtcdWoy4a/HyrPWz..."
     }
 }
 ```
 
-## `ledger:add`
+## `scope:add`
 
 Adds a Ledger. data can contain metadata about said Ledger.
 
 ```json
 {
     "data": {
-        "name": "Test Ledger"
+        "name": "Test Ledger",
+        "scope": "testing.record"
     }
 }
 ```
@@ -171,6 +192,10 @@ Revoke an agent. Signed by an Issuing Authority
 }
 ```
 
-## `data:*`
+## `store`
 
-Anything in the data namespace is fair game. This also means there can be conflicts. Use wisely. HodeauxLedger can hand out new namespaces later
+Basic storage command. Used when there is no operational context or anything else, we just want to record this into the ledger
+
+## `core:note`
+
+Core notes. Can only be executed by the Core Trust. Theses are really anything from foundational notes to ledger milestones. Affect nothing operationally. Can be safely ignored
