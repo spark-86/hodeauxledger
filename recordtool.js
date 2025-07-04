@@ -22,7 +22,7 @@ const privateKey = {
     passphrase,
 };
 
-const publicKeyObj = crypto.createPublicKey(privateKeyPem);
+const publicKeyObj = crypto.createPublicKey(privateKey);
 const publicKeyPem = keyClean(
     publicKeyObj.export({ type: "spki", format: "pem" })
 );
