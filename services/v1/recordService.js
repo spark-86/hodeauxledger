@@ -90,7 +90,6 @@ export const Record = {
         delete copy.current_hash;
 
         const calculatedHash = await this.hash(canonicalize(copy));
-        console.log(providedHash, calculatedHash);
         if (providedHash !== calculatedHash) {
             throw new Error("Hash verification failed");
         }
@@ -144,8 +143,6 @@ export const Record = {
     },
 
     async processRecord(record) {
-        console.log("Processing record type:", record.record_type);
-        //console.log(record.data);
         switch (record.record_type.split(":")[0].toLowerCase()) {
             case "genesis":
                 await BlockGenesis.execute(record);

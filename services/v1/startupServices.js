@@ -44,7 +44,7 @@ export const Startup = {
             new Buffer.from(genesis.current_hash, "base64").toString("hex")
         );
 
-        await this.processBlock(genesis);
+        await Record.processRecord(genesis);
 
         while (!done) {
             if (fs.existsSync(ledgerPath + "/" + currentHash + ".json")) {
@@ -54,7 +54,7 @@ export const Startup = {
                         "utf8"
                     )
                 );
-                await this.processBlock(block);
+                await Record.processRecord(block);
                 // convert current_hash to base16 from base64
                 const hex = Buffer.from(block.current_hash, "base64").toString(
                     "hex"
@@ -64,42 +64,5 @@ export const Startup = {
         }
         await Log.log("start", "ledger", "Ledger built from disk", "", "");
         return genesis;
-    },
-
-    async processBlock(data) {
-        //console.dir(data, { depth: null });
-
-        const verified = await Record.verify(data);
-        if (!verified) {
-            throw new Error("Record verification failed");
-        }
-        console.log("Verified record", data.previous_hash);
-
-        switch (data.record_type) {
-            case "genesis":
-                await Keyring.ringAdd("core", data.data.key);
-                break;
-            case "root:add":
-                await Keyring.ringAdd("root", data.key);
-                break;
-            case "root:update":
-                await Keyring.ringUpdate(data.old_key, "root", data.new_key);
-                break;
-            case "root:revoke":
-                await Keyring.ringRevoke(data.previous_hash);
-                break;
-            case "issuing:add":
-                await Keyring.ringAdd("issuing", data.key);
-                break;
-            case "agent:add":
-                await Keyring.ringAdd("agent", data.key);
-                break;
-            default:
-                break;
-        }
-        await Record.addToDb(data);
-
-        console.log(data);
-        return data;
     },
 };

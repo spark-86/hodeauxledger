@@ -94,7 +94,6 @@ export const Keyring = {
             cipher: "aes-256-cbc",
             passphrase: await this.getRSAPassphrase(),
         });
-        console.log(masterPrivateKey);
 
         const signer = crypto.createSign("sha256");
         signer.update(canonical);
