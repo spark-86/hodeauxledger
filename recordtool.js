@@ -45,7 +45,7 @@ const record = {
     data,
 };
 
-const finalRecord = await Record.sign(record, privateKey);
+const finalRecord = await Record.sign(record, keyFile);
 
 // 7. Submit to HodeauxLedger API
 const submit = async () => {
