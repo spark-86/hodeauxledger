@@ -169,6 +169,7 @@ export const Record = {
     },
 
     async sign(data, keyName) {
+        console.dir(data, { depth: null });
         if (!data.previous_hash && data.record_type !== "genesis") {
             throw new Error("No previous hash provided");
         }
