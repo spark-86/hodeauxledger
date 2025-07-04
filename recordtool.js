@@ -2,7 +2,6 @@ import fs from "fs";
 import crypto from "crypto";
 import canonicalize from "canonicalize";
 import { keyClean } from "./tools/keyCleaner.js";
-import fetch from "node-fetch"; // npm install node-fetch if needed
 import { Record } from "./services/v1/recordService.js";
 
 const previous_hash = process.argv[2];
@@ -52,22 +51,6 @@ const submit = async () => {
     console.log("Submitting record to HodeauxLedger API...");
     console.dir(finalRecord, { depth: null });
     return;
-    const response = await fetch("http://steward.hodeauxledger.org/v1/append", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(finalRecord),
-    });
-
-    if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`Ledger append failed: ${response.status} ${err}`);
-    }
-
-    const json = await response.json();
-    console.log("✅ Record appended successfully:");
-    console.dir(json, { depth: null });
 };
 
 submit().catch((err) => {
