@@ -2,6 +2,7 @@ import canonicalize from "canonicalize";
 import crypto from "crypto";
 import { Record } from "../../services/v1/recordService.js";
 import { Keyring } from "../../services/v1/keyringService.js";
+import { keyFormat } from "../../tools/keyCleaner.js";
 
 export const postAppend = async (req, res) => {
     const {
@@ -37,7 +38,7 @@ export const postAppend = async (req, res) => {
     verify.update(canonical);
     verify.end();
 
-    const verified = verify.verify(found.key, signatureBuf);
+    const verified = verify.verify(keyFormat(found.key), signatureBuf);
     if (!verified) {
         return res.status(401).json({ error: "Signature verification failed" });
     }
