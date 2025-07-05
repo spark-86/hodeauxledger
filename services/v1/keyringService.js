@@ -30,8 +30,9 @@ export const Keyring = {
                 fs.readFileSync(ledgerPath + "/genesis.json", "utf8")
             );
         }
+        let workingPubKey;
 
-        if (!fs.existsSync("/secrets/hodeaux.key")) {
+        if (!fs.existsSync("/secrets/hodeaux.pub")) {
             console.log("Generating keys...");
             const { publicKey, privateKey } = crypto.generateKeyPairSync(
                 "rsa",
@@ -55,6 +56,9 @@ export const Keyring = {
             );
             fs.writeFileSync("/secrets/hodeaux.key", privateKey);
             fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
+            workingPubKey = publicKey;
+        } else {
+            workingPubKey = fs.readFileSync("/secrets/hodeaux.pub", "utf8");
         }
         console.log("Writing genesis record to /ledger/genesis.json");
 
