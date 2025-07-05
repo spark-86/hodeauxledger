@@ -103,8 +103,7 @@ export const Keyring = {
         }
 
         return {
-            publicKey,
-            privateKey,
+            workingPubKey,
         };
     },
 
