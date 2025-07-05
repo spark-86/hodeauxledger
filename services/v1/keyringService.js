@@ -31,32 +31,44 @@ export const Keyring = {
             );
         }
 
-        console.log("Generating keys...");
-        const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-            modulusLength: 4096,
-            publicKeyEncoding: {
-                type: "spki",
-                format: "pem",
-            },
-            privateKeyEncoding: {
-                type: "pkcs8",
-                format: "pem",
-                cipher: "aes-256-cbc",
-                passphrase: process.env.PASSKEY,
-            },
-        });
+        if (!fs.existsSync("/secrets/hodeaux.key")) {
+            console.log("Generating keys...");
+            const { publicKey, privateKey } = crypto.generateKeyPairSync(
+                "rsa",
+                {
+                    modulusLength: 4096,
+                    publicKeyEncoding: {
+                        type: "spki",
+                        format: "pem",
+                    },
+                    privateKeyEncoding: {
+                        type: "pkcs8",
+                        format: "pem",
+                        cipher: "aes-256-cbc",
+                        passphrase: process.env.PASSKEY,
+                    },
+                }
+            );
+
+            console.log(
+                "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"
+            );
+            fs.writeFileSync("/secrets/hodeaux.key", privateKey);
+            fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
+        }
+        console.log("Writing genesis record to /ledger/genesis.json");
 
         /*const payload = {
             name: "HodeauxLedger Core Trust",
             key: keyClean(publicKey),
-        };
+        };*/
 
         const key_hash = crypto
             .createHash("sha256")
-            .update(publicKey)
+            .update(keyClean(publicKey))
             .digest("base64");
 
-        const recordToSign = {
+        /*const recordToSign = {
             previous_hash: "",
             protocol: "v1",
             scope: "",
@@ -64,20 +76,20 @@ export const Keyring = {
             data: payload,
             key: key_hash,
         };*/
-        console.log(
-            "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"
-        );
-        fs.writeFileSync("/secrets/hodeaux.key", privateKey);
-        fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
-        console.log("Writing genesis record to /ledger/genesis.json");
         //const genesisRecord = await Record.sign(recordToSign, "hodeaux");
         //const genesisComplete = await Record.create(genesisRecord);
 
         // load from genesis folder
         const genesisFiles = fs.readdirSync("./genesis");
         for (const file of genesisFiles) {
-            console.log(file);
+            console.log("Processing file:", file);
+            const data = JSON.parse(fs.readFileSync(`./genesis/${file}`));
+            if (data.record_type === "genesis") data.data.key = key_hash;
+            const signed = await Record.sign(data, "hodeaux");
+            console.dir(signed, { depth: null });
+            await Record.create(data);
         }
+
         return {
             publicKey,
             privateKey,
