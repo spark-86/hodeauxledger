@@ -85,13 +85,21 @@ export const Keyring = {
 
         // load from genesis folder
         const genesisFiles = fs.readdirSync("./genesis");
+        let lastHash = "";
         for (const file of genesisFiles) {
             console.log("Processing file:", file);
             const data = JSON.parse(fs.readFileSync(`./genesis/${file}`));
-            if (data.record_type === "genesis") data.data.key = key_hash;
-            const signed = await Record.sign(data, "hodeaux");
+            if (data.record_type === "genesis") data.key = key_hash;
+            const signed = await Record.sign(
+                {
+                    ...data,
+                    previous_hash: lastHash,
+                },
+                "hodeaux"
+            );
             console.dir(signed, { depth: null });
-            await Record.create(data);
+            const finalRecord = await Record.create(data);
+            lastHash = finalRecord.current_hash;
         }
 
         return {
