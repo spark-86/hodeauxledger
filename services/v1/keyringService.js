@@ -98,7 +98,7 @@ export const Keyring = {
                 "hodeaux"
             );
             console.dir(signed, { depth: null });
-            const finalRecord = await Record.create(data);
+            const finalRecord = await Record.create(signed);
             lastHash = finalRecord.current_hash;
         }
 
