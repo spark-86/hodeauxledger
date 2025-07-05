@@ -46,7 +46,7 @@ export const Keyring = {
             },
         });
 
-        const payload = {
+        /*const payload = {
             name: "HodeauxLedger Core Trust",
             key: keyClean(publicKey),
         };
@@ -63,34 +63,21 @@ export const Keyring = {
             record_type: "genesis",
             data: payload,
             key: key_hash,
-        };
+        };*/
         console.log(
             "Writing keys to /secrets/hodeaux.key and /secrets/hodeaux.pub"
         );
         fs.writeFileSync("/secrets/hodeaux.key", privateKey);
         fs.writeFileSync("/secrets/hodeaux.pub", publicKey);
         console.log("Writing genesis record to /ledger/genesis.json");
-        const genesisRecord = await Record.sign(recordToSign, "hodeaux");
-        const genesisComplete = await Record.create(genesisRecord);
+        //const genesisRecord = await Record.sign(recordToSign, "hodeaux");
+        //const genesisComplete = await Record.create(genesisRecord);
 
-        // load from "genesis_records.jsonl" and sign them all
-        let hash = genesisComplete.current_hash;
-        const initialRecords = fs
-            .readFileSync("genesis_records.jsonl", "utf8")
-            .split("\n");
-        for (const record of initialRecords) {
-            const signedRecord = await Record.sign(
-                {
-                    ...JSON.parse(record),
-                    previous_hash: hash,
-                },
-                "hodeaux"
-            );
-            const finalRecord = await Record.create(signedRecord);
-            hash = finalRecord.current_hash;
+        // load from genesis folder
+        const genesisFiles = fs.readdirSync("./genesis");
+        for (const file of genesisFiles) {
+            console.log(file);
         }
-        return genesisRecord;
-
         return {
             publicKey,
             privateKey,

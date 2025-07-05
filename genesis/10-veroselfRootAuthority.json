@@ -1,0 +1,11 @@
+{
+    "protocol": "v1",
+    "scope": "",
+    "key": "%%KEY_HASH%%",
+    "record_type": "root:add",
+    "data": {
+        "name": "VeroSelf.ID Trust Steward",
+        "host": "steward.veroself.id",
+        "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt5y5pPJt3VLalMfk8cOBNAL/2R4ixwHd77mTiucLsxxrFMx1dWo870L0YUvn5gj2eu6taJQFCGBD3vVfMzEjG7HdwjNryTYLlEAzNGcg/kaDoHvEb+bEewGAkTo+GW47fZrSQmtKr6SQ7j8OdYSFiMW/G08nRGipO53MDFXDVUr1xaHPjeqWPNtfmF90xV/ws8UmHNI7l68oK69FHp1Az0sF/MgFHUTyyHhLzjh4uKUGE7moeSz0/bvaXDjzxh77Hnc6XCl9O0/jeHnG07Djv5WjP6XPKCEGFlYjUM5WdSnLU0STHktUj4kCLyEpEKkkU6BLnFjR/ClL8q8OkOiSlwIDAQAB"
+    }
+}

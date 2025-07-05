@@ -1,0 +1,10 @@
+{
+    "protocol": "v1",
+    "scope": "",
+    "key": "%%KEY_HASH%%",
+    "record_type": "genesis",
+    "data": {
+        "name": "Hodeaux Ledger Core Trust",
+        "key": "%%PUBLIC_KEY%%"
+    }
+}
