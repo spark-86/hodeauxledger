@@ -39,7 +39,7 @@ app.use((req, res) => {
 await Record.flushRecords();
 await Keyring.ringFlush();
 
-if (!fs.existsSync(`/secrets/hodeaux.key`)) {
+if (!fs.existsSync(`/ledger/genesis.json`)) {
     await Keyring.genesis();
 } else {
     await Startup.buildLedgerFromDisk();
