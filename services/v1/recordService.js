@@ -37,6 +37,7 @@ export const Record = {
             throw new Error("Last hash not found");
         }
         if (lastHash !== data.previous_hash) {
+            console.log(lastHash, data.previous_hash);
             throw new Error("Previous hash mismatch");
         }
 
