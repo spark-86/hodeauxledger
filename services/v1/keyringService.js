@@ -89,7 +89,7 @@ export const Keyring = {
         for (const file of genesisFiles) {
             console.log("Processing file:", file);
             const data = JSON.parse(fs.readFileSync(`./genesis/${file}`));
-            if (data.record_type === "genesis") data.key = key_hash;
+            if (data.key === "%%KEY_HASH%%") data.key = key_hash;
             const signed = await Record.sign(
                 {
                     ...data,
@@ -97,7 +97,6 @@ export const Keyring = {
                 },
                 "hodeaux"
             );
-            console.dir(signed, { depth: null });
             const finalRecord = await Record.create(signed);
             lastHash = finalRecord.current_hash;
         }
