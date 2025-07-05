@@ -69,7 +69,7 @@ export const Keyring = {
 
         const key_hash = crypto
             .createHash("sha256")
-            .update(keyClean(publicKey))
+            .update(keyClean(workingPubKey))
             .digest("base64");
 
         /*const recordToSign = {
