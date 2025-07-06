@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/spark-86/hodeauxledger/blob/master/docs/schema/core/scope.request.schema.json",
+    "title": "New Scope Request",
+    "type": "object",
+    "required": [
+        "requested_scope",
+        "management_type",
+        "authories"
+    ],
+    "properties": {
+        "requested_scope": {
+            "type": "string"
+        },
+        "management_type": {
+            "type": "string"
+        },
+        "authories": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "additionalProperties": false
+}

@@ -2,10 +2,14 @@
     "protocol": "v1",
     "scope": "",
     "key": "%%KEY_HASH%%",
-    "record_type": "root:add",
+    "record_type": "key:assign",
     "data": {
-        "name": "Hodo Ltd Co Trust Steward",
-        "host": "steward.hodo.llc",
+        "name": "Hodo Ltd Co Trust Steward Master Key",
+        "roles": [
+            "root",
+            "steward"
+        ],
+        "exp": 0,
         "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxJ9rR0G0Kk3dEo+RhPtKhgAjLY1EH7v4K722k1tenFnh2lnKAoTlkUv2JBuli6RHteOOl13PYgxW4d4f0WlIRt3hd6Lu7ZXi3mg3MfyRDKY2vwQB7t1OtaZzRElujz42mzXiBhisxhPdpouDLmTj8uB7FiKDk1WKFuYVf7Twh7Mx8JLE9DnbcQoNCCnOTML3Jx+y1MJ02oZ8ysNh3vZ6aug2SBlN+tv0dUiRr7/7jlGgcP8r3ZkoFS4Z+bdiB8vb74MbnIrxkuNVRijK6RlMsmnn/mMDQ3JpKVIEVMl6WBXa3Bs7mv5B3pGK+FsouSp9OZ3Gyl0xRJ4+HRv/HM1ORQIDAQAB"
     }
 }

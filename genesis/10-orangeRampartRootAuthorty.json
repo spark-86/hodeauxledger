@@ -2,10 +2,14 @@
     "protocol": "v1",
     "scope": "",
     "key": "%%KEY_HASH%%",
-    "record_type": "root:add",
+    "record_type": "key:assign",
     "data": {
-        "name": "Orange Rampart Trust Steward",
-        "host": "steward.orangerampart.com",
+        "name": "Orange Rampart Trust Steward Master Key",
+        "roles": [
+            "root",
+            "steward"
+        ],
+        "exp": 0,
         "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlo7iBWe/AvVx9WkoyK5Gvl+qtDEkz5YiAjYMKdizy4MpOYWwb7dN9h2S1/GWiePElr6gB60X/0/UB4UhJfLNBhfAoqsQ+h0Xf/kJ1PJlewkq2vFsmGosRJZvd499UZa5nACdLYr4ls+rmw7rTEwVuH0fhYnZjrm4ykznK9GRkpldCH6R75tj4DKScrZLqqr/cQTVonxb3PbOQhqxVbHXgsjuasWF579SitgELVPJ/Q7GcXHz94bw6f1t0EYKkKEX0fll+U4OMsw9F8qwQUjVRhFge0vf7/zi/xsUimHHQXELvaAl+hKo45rB7giZbWJcL3+XfMcHzMzQz6p1x4OgCwIDAQAB"
     }
 }

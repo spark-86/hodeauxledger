@@ -6,6 +6,7 @@ import fs from "fs";
 import { generateBase32 } from "../../tools/base32.js";
 import { configDotenv } from "dotenv";
 import { keyClean } from "../../tools/keyCleaner.js";
+import { Read } from "./readService.js";
 
 configDotenv();
 
@@ -85,8 +86,9 @@ export const Keyring = {
 
         // load from genesis folder
         const genesisFiles = fs.readdirSync("./genesis");
+
         let lastHash = "";
-        for (const file of genesisFiles) {
+        for (const file of genesisFiles.sort((a, b) => a.localeCompare(b))) {
             console.log("Processing file:", file);
             const data = JSON.parse(fs.readFileSync(`./genesis/${file}`));
             if (data.key === "%%KEY_HASH%%") data.key = key_hash;
@@ -106,14 +108,15 @@ export const Keyring = {
         };
     },
 
-    async ringAdd(type, key, issued = 0, exp = 0) {
+    async ringAdd(scope, roles, key, issued = 0, exp = 0) {
         const key_hash = crypto
             .createHash("sha256")
             .update(key)
             .digest("base64");
 
         await db(keyringTable).insert({
-            key_type: type,
+            scope,
+            roles: roles.join(","),
             key,
             key_hash,
             issued: issued ? issued : Date.now(),
@@ -122,7 +125,7 @@ export const Keyring = {
         console.log(`Key added to keyring: ${key_hash} [${type}]`);
     },
 
-    async ringUpdate(oldKeyHash, type, newKey) {
+    async ringUpdate(scope, oldKeyHash, roles, newKey, issued = 0, exp = 0) {
         const key_hash = crypto
             .createHash("256")
             .update(newKey)
@@ -130,7 +133,10 @@ export const Keyring = {
 
         await db(keyringTable)
             .update({
-                key_type: type,
+                scope,
+                roles: roles.join(","),
+                exp: exp ? exp : 0,
+                issued: issued ? issued : Date.now(),
                 key: newKey,
                 key_hash,
             })
@@ -147,5 +153,23 @@ export const Keyring = {
 
     async ringLookup(key_hash) {
         return await db(keyringTable).where({ key_hash }).first();
+    },
+
+    async scrapeScope(scope) {
+        const records = await Read.scope(scope, "key:");
+        for (const record of records) {
+            switch (record.record_type) {
+                case "key:add":
+                    await this.ringAdd(
+                        scope,
+                        record.data.roles,
+                        record.data.key,
+                        record.data.issued ? record.data.issued : 0,
+                        record.data.exp ? record.data.exp : 0
+                    );
+                    break;
+            }
+        }
+        return records;
     },
 };

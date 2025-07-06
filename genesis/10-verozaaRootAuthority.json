@@ -2,10 +2,15 @@
     "protocol": "v1",
     "scope": "",
     "key": "%%KEY_HASH%%",
-    "record_type": "root:add",
+    "record_type": "key:assign",
     "data": {
-        "name": "Verozaa Trust Steward",
+        "name": "Verozaa Trust Steward Master Key",
         "host": "steward.verozaa.com",
+        "roles": [
+            "root",
+            "steward"
+        ],
+        "exp": 0,
         "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApIgnHgZrHJ5Jm7WINaoFlEjZ2l7HNPMs9A5aypQbUME+n2Y9c2QawDzJ+ppLbxRr4YEN0uaxfVo2IyVfuJSXr5JmGkt6AVidVYoZyy9IMAFBFuw4Vl9U1aHDLJjr90Np9o3YaUxHB8mZFEujjOeegkAtBaaAntHVITrDxxkfd2fuJZJrdBAwyrN9fYXlrM1ic3Dafmb1+k4weSpF4qWKFYvZDc272CzGzIrPAURZZmeaP4XK/7hJ6HhYcKwqvf/39ixRzTU6nmh81YHpCTqiJvvWfeGWBB+syis6Q0lCvd4HXAo3B1q72vLvWFhSKLe6BVm+GYjJ99oznBJ8ntp+3wIDAQAB"
     }
 }
