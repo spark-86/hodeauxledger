@@ -1,17 +1,18 @@
 import knex from "knex";
-import { configDotenv } from "dotenv";
+import { loadConfig } from "../services/v2/configService.js";
 
-configDotenv();
+export const createDb = () => {
+    const config = loadConfig();
 
-const db = knex({
-    client: "mysql2",
-    connection: {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 3306,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
-    },
-});
-
-export default db;
+    const db = knex({
+        client: "mysql2",
+        connection: {
+            host: config.db.host,
+            port: config.db.port || 3306,
+            user: config.db.user || "root",
+            password: config.db.password || "",
+            database: config.db.database || "ledger",
+        },
+    });
+    return db;
+};

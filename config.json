@@ -1,0 +1,13 @@
+{
+    "http_port": 1978,
+    "https_port": 1984,
+    "secrets": "/secrets",
+    "ledger": "/ledger",
+    "db": {
+        "host": "localhost",
+        "user": "hodeaux",
+        "password": "chaos1201",
+        "port": 3306,
+        "name": "hodeaux"
+    }
+}

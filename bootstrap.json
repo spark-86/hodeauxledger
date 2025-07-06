@@ -1,0 +1,31 @@
+{
+    "roots": [
+        {
+            "name": "Verozaa Inc. Root Trust",
+            "key": "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA1VRXjfRNfCVrAyy8s9tdfgs6/fwv5YvOLq6djDcbIuXsc5XQ67NNwzp4piUxblENb3n4eF5TlDu9rKlRST0ESZXCGdsmcCNEWpD4fABnEAmmOZhG8HgbwXdqIkmIjvRzOBIujPwoLj4UXwf3WToB1ZnfR8SWD/ppjF37hQdGEuxbrw5zgQ+UJIXzPJR1heMTlvLcqANy+6hPrRuv32PK/4sb5deH1jtZemzxpAa6PvqcBAhPtLBOjxmG1TTKsmBFbQDdb9qj07eHImnUJByb+7uRmht/E7MCWkjP/QhDFVnmeRn513ME96MIRk6stGkud6MDG48AUTd0G3Oq1cwZsewMNI7LwJ28BnH2YgbCggBlJtpISac8FQ3p4LovrMNuh7Z3Apyx5HhMj+fbsYb0208vpWdSbVj5s4jQCeau/gUdc3cL6BcldqZrjoo0NqY2OiG6uEzlAZ3NwKMZVpdsfP+TJea4Niqv0X5SGiTst9GAZ6hqBcl4NF3Fr3/d1fNQ5SjNUuLzqUTMFhou3i0vUocfGTvo9UTl509hdV4GOt6gPAN+wXcaP4/5Bayl3mm+LnpABQWRzVRuC2M3XOp2jbrGI7ZCaKhOTD+EXN8ii07Ccd82BW9JlJGjWLO1nbpFShwL4DeJ4ORm7ewkJ39cHCaa7AaqEiKx2kXCwS+Y0dcCAwEAAQ=="
+        },
+        {
+            "name": "Hodo Ltd. Co. Root Trust",
+            "key": "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxuVGtv5f2A3eQfH+PhVn0+xGN9CrypJYnXdXLa5tN26LuyZcFeOLYwo1yoQH8cqt7D8lgmbkCOe7DfJwJBZmHebeb73NusRdDuCcU6yeTLraL9BeCfQjH26y/Shko/+v/cbDpdyc5y6S6xQiH4lCvE4UD3ZIb30lfih+O8sbx9mvSNEDYi2KYcf1HzMnyMfE3aouPg1qyFCw+g6HygHSiIduKL6wg1kuMAdAnQTwzgSmmtWrqQcHziv0+AGJ27fbN+Y4D8ZFy/RpTzIGNDv2aVvpcOpRzyvJ5WO6JveuvQ3OtE66YX2zquKBD/HkUDAaC4qQk6Adx6RfGORtEh14R6Tb8N+N55xxL6iw0JpcHYhKGM8olhCVOTz+xA5D5S61cZrqwXjMhtco/KnqGVuBq9jLChbVLux8aRxVpd+JRT5K1leQlpu32pRUVGCfMmnBAFc8jKeW/Qf26ncOqVeucZj3Zteo1JLqBqMnG6mbguXYeYXiwrBcRwGsB4WTvtz+vWZbeJqZfl1k7PgMNonOYVB7D8RYINnU6vC2eP4ZTC9ntD/1PDfvddUJ3RSaAvTH0qzB7M2J00hMAuAJNeKOfroOFUz8qldwgOpxG0ohWVMCyr15VQDNRovr+uVOrRcwohAq87TeTtEN4QtxTQW2DI0WcXa3swcCYy7XfalwLnsCAwEAAQ=="
+        },
+        {
+            "name": "Spark 86 LLC Root Trust",
+            "key": "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtkIXPMTSviQvpPSqDbdBGHxTBpPJ7t/UhXpyLIRXWHU/Ac4QTiPj/yLeWkXFWCT4CpKK2Ha76DmO25kMRRdXLdWMucJAe3D1vFg69c0a9gWHE0IrRg2lCl0vJXg4MlGHe0/8w6JHQkHTJK+Lr9VsPrsapkmIqOORnYGIde4atzDnAc5bmtBVF/Kxw6tHAglkSHvJPWD3V61X9yWjDuhG6T40guxVbh4bEXJcAY+8ZilrS9/e+baPvgFDhoA0mwKTB/TyTatwTR3GYDXgtmuRLBvTQwb/jsKO0tTwCcIoWbj9QCHvTD7el1KANF8QE4pNK5GiISt2xTBaU3iK0zmhwhT0UzsB7v+qEeu/4yhhgER2pnq7PGUp2N/LKTEI3NzjkG/q3qkKKrriKZsVSiJIOt/QVwV2JEn2iRu7W0vVrvYCH0GVL37vViwOnHFzq30dEdTFbhlZG8CeGhlgU+XQyt+eZnBKyxRRCSO+q53gS1kVqKqRqDxZl2l/GVfoOgPEwOE4gSTVJ1mYhDi5h4A3+LNllmSqBwf8UWe337MiDHO676BAkyYO02a9LAF4hsZe61BeIdtM/GGlntopQF41oksVws++tiNvM9wvJVf2/ljJR+k6gXUAvQIsjRvpzJaAXtZSBpHEh5La6TbJlh8xpHyfqt261acarGNDjK5/p+kCAwEAAQ=="
+        },
+        {
+            "name": "eMotor.ID Root Trust",
+            "key": "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAvVfLWcyZlknpRQ9A+wGH6GkIFKERY2SCQCHrT3pA9X99jm2qtmhZawe0ql1yF2ySYcCDrLpKfwwfsOdsWGM9ip5lRTAUvrxrj0sNhf/69k9v7vP/OzjEzllIj6KkVlkrxeFrnXmDoE7fUng/SCsAa3bCPBGh+0+YfEXMJsmbVmjkMNlVWde0UsTMzQtfKGRaxcn1+Xs6nhBGQWxif+KB8a9Uq569aRVBAWffnOLAoNNs5FZgkUoqs1LpAZ81REetqAqLWpcimKe+L7aCeTzvZmZzkS8o4H7ejwGSIsWKoaEGZZccf9oP4gNWxkZyklFmIkIgiVDXVByHDvprXbFNrVV1XRHqdkPHHAe8K/tfQfhWOJBKpG7Pw+K6n72YwGj6i+3c3vTzN1WDbXEB7epsg3Py26b4YlXshYY/TwGPOAoeCzTrf8KXvGz99B3Is2R1ZE6HjlA/4m7gXXVygDvvkXCU5/imA+CYdRfDANnhCDItcb+sKwX3W/hTzDNUGMcSt7OU5yRX49jmlTw7vvjLyZj4kjaQEUPjj12lpzSCB3NCi5T1zCqfHouc5KZVXdcuw1BemddbPX/STselTgO/Xm7UQ8e462kCJ/1VEL9LEawYXVK4R4oXwlFV3t1OhbP6zRim1GqOuIXwiRgoh3NqbyE7MB7oZxd2DigokS5s+FUCAwEAAQ=="
+        },
+        {
+            "name": "VeroSelf Root Trust",
+            "key": "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAhvvo/V/UwzFvqbSKiV+rQoDw9t6YRUhhjy0Y30yxYTPQ31pYxy+jIk2zIyo4GoHoKo0HD+Gb4FNxupbR0VnCqIWoqxYmxVWBCQdllA0GZTM6rJx0z+exfcoeYBRQs7JkIj1CMEkn0zed/gelVjorReIKyLlAOQ510TXBwP3gOda0o+9fA37omURWMzUuVxcpi67qAdCQHX2OvvNeC/loN907aBD8bt4hpjWPSP1ZPlQ3tT1XpdheI1AeD+GhPc+mmUWmK1AXgbZI4hGcW8ecB4vFuNj4gERzfUVs//hSBiE62qNZYLjS5l/+iWfFLJtt/ybpbnZyFYhxKc7RyjdWHMuadAbCM8uDNch4S8mdbBxQePjsaBswbJ1RwuLpSCmFU5fKGeipgHQkqdMJEVBU4MA8nuUkFsZd2io7qRW3CM4XQFtz6t/5oOCJslKkiBoUtZNEuWkiLeKLEjKWPR/R+WrCbpBxd2HoJlecR4CtlpDAY5bATO74O0If5JRsb6jjmOsvPFsHbsngqd7sp8/0mbvgsg8DjP9x0V0bSSZ0bzHfSBwPTecL8XOZAoDQ/YMqvUMCZ+nIhtlx72Xpv40lEg8Y/WA+TyKVfCkKxYaQW4T0ARYpsfMkRS5UfmS/UMMPH74piFUyaK56A0aK7g4eZCb4/w1zzhmP79MkVDhg7nUCAwEAAQ=="
+        }
+    ],
+    "masterScope": {
+        "policy": [
+            "quorum3of5",
+            "roleWrite",
+            "publicRead"
+        ]
+    }
+}
