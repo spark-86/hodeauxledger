@@ -14,7 +14,7 @@ program
     .option("-h, --help", "Show help")
     .option("-a, --analyze", "Analyze key")
     .option("-l, --list-keys", "List keys in /secrets")
-    .option("-g, --generate-keys <keyName>", "Generate new keys");
+    .option("-g, --generate-keys", "Generate new keys");
 
 program.parse(process.argv);
 
@@ -69,7 +69,7 @@ let workingSecretKey;
 
 if (options.generateKeys) {
     ({ publicKey: workingPubKey, privateKey: workingSecretKey } =
-        await generateKeys(options.keyName));
+        await generateKeys(options.key));
 } else {
     workingPubKey = fs.readFileSync("/secrets/" + options.key + ".pub", "utf8");
     workingSecretKey = fs.readFileSync(
