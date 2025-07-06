@@ -9,7 +9,7 @@ program
     .name("keytool")
     .description("")
     .version("0.0.1")
-    .requiredOption("-p, --passphrase <passphrase>", "Passphrase for key")
+    .option("-p, --passphrase <passphrase>", "Passphrase for key")
     .option("-k, --key <keyName>", "Key name")
     .option("-h, --help", "Show help")
     .option("-a, --analyze", "Analyze key")
@@ -31,7 +31,7 @@ const generateKeys = async (keyName) => {
             type: "pkcs8",
             format: "pem",
             cipher: "aes-256-cbc",
-            passphrase: options.passphrase,
+            passphrase: options.passphrase ? options.passphrase : "",
         },
     });
 
