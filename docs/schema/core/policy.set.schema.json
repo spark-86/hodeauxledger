@@ -8,10 +8,8 @@
     ],
     "properties": {
         "policy": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "type": "object",
+            "description": "Freeform policy object"
         }
     },
     "additionalProperties": false

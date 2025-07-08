@@ -6,6 +6,10 @@ import { loadConfig } from "./services/v2/configService.js";
 import { Command } from "commander";
 import crypto from "crypto";
 import { Key } from "./services/v2/keyService.js";
+import sodium from "libsodium-wrappers-sumo";
+import chalk from "chalk";
+
+await sodium.ready;
 
 const program = new Command();
 program
@@ -38,68 +42,78 @@ if (options.help) {
 
 if (options.list) {
     const keys = fs.readdirSync(config.secrets);
+    const privKeys = [];
+    const pubKeys = [];
+    const hotKeys = [];
     for (const key of keys) {
-        if (key.endsWith(".key")) {
-            console.log(key);
+        if (key.endsWith(".enc.json")) {
+            privKeys.push(chalk.yellow(key));
+        } else {
+            if (key.endsWith(".pub")) {
+                pubKeys.push(key);
+            } else {
+                if (key.endsWith(".hot.json"))
+                    hotKeys.push(chalk.red.bold(key));
+            }
         }
     }
+    console.log(chalk.white.bold("Hot Keys:"));
+    console.log(hotKeys.join(", "));
+    console.log(chalk.white.bold("Private Keys:"));
+    console.log(privKeys.join(", "));
+    console.log(chalk.white.bold("Public Keys"));
+    console.log(pubKeys.join(", "));
     process.exit(0);
 }
 
 if (options.generate) {
-    if (!options.passphrase) throw new Error("Passphrase is required");
-    const { publicKey, privateKey } = await Key.generatePair(
-        options.passphrase
-    );
+    const { publicKey, privateKey } = await Key.generatePair();
+    if (options.passphrase) {
+        const encrypted = await Key.encryptPrivateKey(
+            privateKey,
+            options.passphrase
+        );
+        fs.writeFileSync(
+            config.secrets + "/" + options.outfile + ".enc.json",
+            JSON.stringify(encrypted)
+        );
+    } else {
+        fs.writeFileSync(
+            config.secrets + "/" + options.outfile + ".hot.json",
+            JSON.stringify({
+                key: privateKey,
+            })
+        );
+    }
 
-    fs.writeFileSync(
-        config.secrets + "/" + options.outfile + ".key",
-        privateKey
-    );
     fs.writeFileSync(
         config.secrets + "/" + options.outfile + ".pub",
         publicKey
     );
+    console.log("Keys generated - ed25519:" + publicKey);
     process.exit(0);
 }
 
 if (options.analyze) {
-    console.log(
-        "Analyzing key " + config.secrets + "/" + options.outfile + ".key"
-    );
-    const key = fs.readFileSync(
-        config.secrets + "/" + options.outfile + ".key",
-        "utf8"
-    );
-    if (!key) {
-        console.error("Key not found");
-        process.exit(1);
-    }
-    if (
-        !key.startsWith("-----BEGIN PRIVATE KEY-----") &&
-        !key.startsWith("-----BEGIN ENCRYPTED PRIVATE KEY-----")
-    ) {
-        console.error("Key is not a private key");
-        process.exit(1);
-    }
-    const masterKey = {
-        key,
-        passphrase: options.passphrase ? options.passphrase : "",
-    };
-    const pubKey = crypto.createPublicKey(masterKey);
-
-    const fingerprint = crypto
-        .createHash("sha256")
-        .update(
-            Key.rawPublicKey(
-                pubKey.export({
-                    type: "spki",
-                    format: "pem",
-                })
-            )
+    if (!options.passphrase) throw new Error("Passphrase is required");
+    const encrypted = JSON.parse(
+        fs.readFileSync(
+            config.secrets + "/" + options.outfile + ".ed25519.json"
         )
-        .digest("base64");
-    console.log("Fingerprint:", fingerprint);
+    );
+
+    encrypted.passphrase = options.passphrase;
+    const privateKey = await Key.decryptPrivateKey(encrypted);
+    console.log(
+        "Private key is " +
+            chalk.yellow.bold(privateKey.length) +
+            " bytes long."
+    );
+    if (privateKey.length === 64) {
+        console.log(chalk.green.bold("Good"));
+    } else {
+        console.log(chalk.red.bold("Bad"));
+    }
     process.exit(0);
 }
 

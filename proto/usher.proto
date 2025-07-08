@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package usher;
+
+
+message UsherMessage {
+    string type = 1;
+    string scope = 2;
+    string payload = 3;
+    string nonce = 4;
+    string public_key = 5;
+    string signature = 6;
+}
+
+service UsherSync {
+    rpc Send (stream UsherMessage) returns (UsherMessage);
+    rpc Receive (UsherMessage) returns (stream UsherMessage);
+}
+
+

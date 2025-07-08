@@ -1,69 +1,91 @@
-import crypto from "crypto";
 import { createDb } from "../../tools/db.js";
+import sodium from "libsodium-wrappers-sumo";
+import fs from "fs";
 
 const keyringTable = "keyring";
 
 export const Key = {
     async getPublicFromPrivate(key, passphrase) {
-        const privateKey = {
-            key,
-            passphrase,
-        };
-        const publicKeyObj = crypto.createPublicKey(privateKey);
-        const publicKeyPem = publicKeyObj.export({
-            type: "spki",
-            format: "pem",
-        });
-        return publicKeyPem;
-    },
-
-    padKey(key, isPrivate = false) {
-        // Add \n to blob for each line
-        const formatted = key.match(/.{1,64}/g).join("\n");
-        if (isPrivate) {
-            return (
-                "-----BEGIN PRIVATE KEY-----\n" +
-                formatted +
-                "\n-----END PRIVATE KEY-----"
-            );
+        await sodium.ready;
+        let binPrivateKey;
+        if (typeof key === "string") {
+            binPrivateKey = sodium.from_base64(key);
+        } else if (key instanceof Uint8Array) {
+            binPrivateKey = key;
         } else {
-            return (
-                "-----BEGIN PUBLIC KEY-----\n" +
-                formatted +
-                "\n-----END PUBLIC KEY-----"
-            );
+            throw new TypeError("Unsupported private key format");
         }
+        const seed = binPrivateKey.slice(0, 32);
+        const { publicKey } = sodium.crypto_sign_seed_keypair(seed);
+        return sodium.to_base64(publicKey);
     },
 
-    rawPublicKey(key) {
-        const lines = key.split("\n");
-        const base64lines = lines.filter(
-            (line) => !line.startsWith("-----") && line.trim() !== ""
+    async encryptPrivateKey(key, passphrase) {
+        await sodium.ready;
+        const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
+        const nonce = sodium.randombytes_buf(
+            sodium.crypto_secretbox_NONCEBYTES
         );
-        const base64 = base64lines.join("");
-        return Buffer.from(base64, "base64");
+        const privateKey = sodium.crypto_pwhash(
+            sodium.crypto_secretbox_KEYBYTES,
+            passphrase,
+            salt,
+            sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+            sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+            sodium.crypto_pwhash_ALG_DEFAULT
+        );
+        const rawKey = sodium.from_base64(key);
+        const encrypted = sodium.crypto_secretbox_easy(
+            rawKey,
+            nonce,
+            privateKey
+        );
+
+        return {
+            nonce: sodium.to_base64(nonce),
+            encrypted: sodium.to_base64(encrypted),
+            salt: sodium.to_base64(salt),
+        };
+    },
+
+    async decryptPrivateKey({ nonce, encrypted, salt, passphrase }) {
+        await sodium.ready;
+        const nonceBuf = sodium.from_base64(nonce);
+        const encryptedBuf = sodium.from_base64(encrypted);
+        const saltBuf = sodium.from_base64(salt);
+        const privateKey = sodium.crypto_pwhash(
+            sodium.crypto_secretbox_KEYBYTES,
+            passphrase,
+            saltBuf,
+            sodium.crypto_pwhash_OPSLIMIT_MODERATE,
+            sodium.crypto_pwhash_MEMLIMIT_MODERATE,
+            sodium.crypto_pwhash_ALG_DEFAULT
+        );
+        const decrypted = sodium.crypto_secretbox_open_easy(
+            encryptedBuf,
+            nonceBuf,
+            privateKey
+        );
+        return sodium.to_base64(decrypted);
     },
 
     async calcFingerprint(key) {
-        return crypto.createHash("sha256").update(key).digest("base64");
+        await sodium.ready;
+        const keyInBin = sodium.from_base64(key);
+        if (keyInBin.length === 32) {
+            return key;
+        } else {
+            return await this.getPublicFromPrivate(key);
+        }
     },
 
-    async generatePair(passphrase) {
-        const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-            modulusLength: 4096,
-            publicKeyEncoding: {
-                type: "spki",
-                format: "pem",
-            },
-            privateKeyEncoding: {
-                type: "pkcs8",
-                format: "pem",
-                cipher: "aes-256-cbc",
-                passphrase,
-            },
-        });
-
-        return { publicKey, privateKey };
+    async generatePair() {
+        await sodium.ready;
+        const keyPair = sodium.crypto_sign_keypair();
+        return {
+            publicKey: sodium.to_base64(keyPair.publicKey),
+            privateKey: sodium.to_base64(keyPair.privateKey),
+        };
     },
 
     /**
@@ -75,9 +97,11 @@ export const Key = {
      * @param {number} exp - When the key expires
      */
     async ringAdd(scope, roles, key, issued = 0, exp = 0) {
+        await sodium.ready;
+
         const db = createDb();
 
-        const fingerprint = await this.calcFingerprint(this.rawPublicKey(key));
+        const fingerprint = key;
 
         await db(keyringTable).insert({
             scope,
@@ -104,5 +128,18 @@ export const Key = {
             .first();
         key.roles = key.roles.split(",");
         return key;
+    },
+
+    async privateKeyFromDisk(path, keyType, passphrase = "") {
+        const ext = passphrase ? ".enc.json" : ".hot.json";
+        if (!fs.existsSync(path + "/" + keyType + ext))
+            throw new Error(`Cannot find keyfile: ${path}/${keyType}${ext}`);
+        const keyFile = JSON.parse(fs.readFileSync(path + "/" + keyType + ext));
+        if (keyFile.passphrase) {
+            keyFile.passphrase = passphrase;
+            return await this.decryptPrivateKey({ keyFile });
+        } else {
+            return keyFile.key;
+        }
     },
 };

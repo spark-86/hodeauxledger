@@ -4,9 +4,14 @@
     "title": "Key Revoke Schema",
     "type": "object",
     "required": [
-        "key_hash"
+        "schema",
+        "key_hash",
+        "reason"
     ],
     "properties": {
+        "schema": {
+            "const": "key:revoke"
+        },
         "key_hash": {
             "type": "string"
         },

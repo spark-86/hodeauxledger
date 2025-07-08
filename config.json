@@ -3,6 +3,7 @@
     "https_port": 1984,
     "secrets": "/secrets",
     "ledger": "/ledger",
+    "logfile": "./logs/hodeaux.log",
     "db": {
         "host": "localhost",
         "user": "hodeaux",

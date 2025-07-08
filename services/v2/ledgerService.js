@@ -13,28 +13,37 @@ export const Ledger = {
         // Make sure this is a complete record
         if (!data.protocol) throw new Error("No protocol provided");
         if (data.protocol === "v1") {
-            if (!data.previous_hash)
+            if (!data.previous_hash && data.record_type !== "genesis")
                 throw new Error("No previous hash provided");
             if (!data.record_type) throw new Error("No record type provided");
+            if (!data.nonce) throw new Error("Nonce not provided");
+            if (!data.at) throw new Error("No at time provided");
             if (!data.fingerprint) throw new Error("No key provided");
             if (!data.signature) throw new Error("No signature provided");
             if (!data.current_hash) throw new Error("No current hash provided");
+            if (!data.received_by) throw new Error("Usher didn't sign");
+            if (!data.received_signature) throw new Error("Usher didn't sign");
         } else {
             throw new Error("Unknown protocol: " + data.protocol);
         }
 
         // Make sure we are matching hashes
-        const lastHash = config.ledger + "/lastHash_" + data.scope + ".txt";
-        if (fs.existsSync(lastHash)) {
-            const lastHashValue = fs.readFileSync(lastHash, "utf8");
-            if (lastHashValue !== data.previous_hash)
-                throw new Error("Previous hash mismatch");
-        } else {
-            throw new Error("Scope not found");
+        if (data.record_type !== "genesis") {
+            const tip = await this.getTip(data.scope);
+
+            if (tip) {
+                if (tip !== data.previous_hash)
+                    throw new Error("Previous hash mismatch");
+            } else {
+                throw new Error("Scope not found");
+            }
         }
 
         // Save to disk first
         await this.writeToDisk(config.ledger, data);
+
+        // Update the tip
+        await this.updateTip(data);
 
         // Save to db
         const recordId = await this.addToDb(data);
@@ -55,7 +64,7 @@ export const Ledger = {
             throw new Error("Key not found - can not verify record");
 
         // Verify the record
-        if (await Record.verify(data, Key.padKey(publicKey.key))) {
+        if (await Record.verify(data, publicKey.key)) {
             // Process the record
             await Record.processRecord(data);
             // Save to db
@@ -78,14 +87,8 @@ export const Ledger = {
     async buildFromDisk(path) {
         // Set the core key
         const config = loadConfig();
-        const coreKey = Key.rawPublicKey(
-            fs.readFileSync(config.secrets + "/hodeaux.pub", "utf8")
-        );
-        await Key.ringAdd(
-            "",
-            ["core"],
-            Buffer.from(coreKey, "binary").toString("base64")
-        );
+        const coreKey = fs.readFileSync(config.secrets + "/master.pub", "utf8");
+        await Key.ringAdd("", ["core"], coreKey);
 
         let workingPath = path;
         if (!workingPath.endsWith("/")) workingPath += "/";
@@ -128,13 +131,32 @@ export const Ledger = {
     },
 
     async writeToDisk(path, data) {
-        if (!data.previous_hash) throw new Error("No previous hash provided");
+        if (!data.previous_hash && data.record_type !== "genesis")
+            throw new Error("No previous hash provided");
+        const filename = data.previous_hash
+            ? Buffer.from(data.previous_hash, "base64").toString("hex")
+            : "genesis";
+        fs.writeFileSync(path + "/" + filename + ".json", JSON.stringify(data));
+    },
+
+    async updateTip(data) {
+        const config = loadConfig();
         fs.writeFileSync(
-            path +
-                "/" +
-                Buffer.from(data.previous_hash, "base64").toString("hex") +
-                ".json",
-            JSON.stringify(data)
+            config.ledger + "/lastHash_" + data.scope + ".txt",
+            data.current_hash
         );
+    },
+
+    async getTip(scope) {
+        const config = loadConfig();
+        if (fs.existsSync(config.ledger + "/lastHash_" + scope + ".txt")) {
+            const lastHash = fs.readFileSync(
+                config.ledger + "/lastHash_" + scope + ".txt",
+                "utf8"
+            );
+            return lastHash;
+        } else {
+            throw new Error("Scope not found");
+        }
     },
 };

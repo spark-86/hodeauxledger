@@ -3,7 +3,7 @@ import fs from "fs";
 
 let cachedConfig = null;
 
-export function loadConfig(path) {
+export function loadConfig(path, overrides = {}) {
     if (cachedConfig) return cachedConfig;
 
     if (!path) return;
@@ -22,5 +22,9 @@ export function loadConfig(path) {
         cachedConfig.ledger = cachedConfig.ledger.slice(0, -1);
     }
     console.log("Loaded config from " + path);
+    cachedConfig = {
+        ...cachedConfig,
+        ...overrides,
+    };
     return cachedConfig;
 }

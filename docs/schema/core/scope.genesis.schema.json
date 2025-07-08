@@ -4,7 +4,8 @@
     "title": "Core Scope Genesis",
     "type": "object",
     "required": [
-        "authories"
+        "authories",
+        "policy"
     ],
     "properties": {
         "name": {

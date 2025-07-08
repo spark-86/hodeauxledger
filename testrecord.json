@@ -1,0 +1,8 @@
+{
+    "protocol": "v1",
+    "scope": "",
+    "record_type": "usher:status",
+    "data": {
+        "schema": "usher_status_r1"
+    }
+}
