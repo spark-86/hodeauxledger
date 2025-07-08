@@ -18,6 +18,7 @@ export const UsherProcessor = {
         let data;
         if (typeof data === "string") data = JSON.parse(jsonPayload);
         else data = jsonPayload;
+        console.log(data);
         const parsedData = JSON.parse(data.payload);
         data.payload = {
             ...parsedData,

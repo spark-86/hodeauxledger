@@ -142,13 +142,20 @@ export const Ledger = {
     async updateTip(data) {
         const config = loadConfig();
         fs.writeFileSync(
-            config.ledger + "/lastHash_" + data.scope + ".txt",
+            config.ledger +
+                "/" +
+                data.scope +
+                "/" +
+                lastHash +
+                data.scope +
+                ".txt",
             data.current_hash
         );
     },
 
     async getTip(scope) {
         const config = loadConfig();
+
         if (fs.existsSync(config.ledger + "/lastHash_" + scope + ".txt")) {
             const lastHash = fs.readFileSync(
                 config.ledger + "/lastHash_" + scope + ".txt",

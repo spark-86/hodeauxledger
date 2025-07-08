@@ -1,6 +1,5 @@
 {
-    "http_port": 1978,
-    "https_port": 1984,
+    "httpPort": 1978,
     "secrets": "/secrets",
     "ledger": "/ledger",
     "logfile": "./logs/hodeaux.log",

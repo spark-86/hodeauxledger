@@ -103,4 +103,8 @@ const main = async () => {
     process.exit(0);
 };
 
+server.addService(UsherService.service, {
+    send: (call, callback) => {},
+});
+
 main();

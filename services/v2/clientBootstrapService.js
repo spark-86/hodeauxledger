@@ -33,13 +33,27 @@ export const ClientBootstrap = {
                 previous_hash: "TJNoFoF63K3mXpJKNzVbD+zp6kZJ3DdwFhdENNUG3F0=",
                 protocol: "v1",
                 scope: "",
-                nonce: "yWnf8kvB4Oi9GXHyh3tsBeVmhLmY5a-Yo1LFc9rqKzA",
+                nonce: "x-Yo1LFc9rqKzA",
                 at: 1751922231005,
                 fingerprint: "QPH2eqvfpNAcfsIOOYmtqhQJsil2fL-IizcDei5WJ1w",
                 record_type: "root:add",
                 data: {
-                    name: "VeroSelf Root Trust",
-                    key: "aiWnU8bF8mNqXqr_2MpuLZnIHAlviWhX75WV6d1J0hs",
+                    previous_hash:
+                        "TJNoFoF63K3mXpJKNzVbD+zp6kZJ3DdwFhdENNUG3F0=",
+                    protocol: "v1",
+                    scope: "",
+                    nonce: "yWnf8kvB4Oi9GXHyh3tsBeVmhLmY5a-Yo1LFc9rqKzA",
+                    at: 1751922231005,
+                    fingerprint: "QPH2eqvfpNAcfsIOOYmtqhQJsil2fL-IizcDei5WJ1w",
+                    record_type: "root:add",
+                    data: {
+                        name: "VeroSelf Root Trust",
+                        key: "aiWnU8bF8mNqXqr_2MpuLZnIHAlviWhX75WV6d1J0hs",
+                    },
+                    signature:
+                        "FCBZLkPxxlzsldCvkXbXx086k6pD-NliXGqmSgNgDijo8T0zhaLRwGx7zUScIkow_di3kDl79k2KAiVUzNuQAw",
+                    current_hash:
+                        "/2QsBh7+K5xnKr1I5v4ohPIqqhsplPqAv66AY03r+b8=",
                 },
             }),
             nonce: "9q0p8e9ouqweoij",

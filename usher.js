@@ -12,6 +12,10 @@ import { CoreBootstrap } from "./services/v2/coreBootstrapService.js";
 import { Key } from "./services/v2/keyService.js";
 import { Ledger } from "./services/v2/ledgerService.js";
 import { UsherProcessor } from "./services/v2/usherProcessorService.js";
+import express from "express";
+import { RootBootstrap } from "./services/v2/rootBootstrapService.js";
+import appendRoutes from "./routes/v1/appendRoutes.js";
+import tipRoutes from "./routes/v1/tipRoutes.js";
 
 // Setup paths
 const __filename = fileURLToPath(import.meta.url);
@@ -156,6 +160,30 @@ server.bindAsync(
             console.error("Failed to start server:", err);
             process.exit(1);
         }
+
+        // Boot webserver now for admin UI
+        const app = express();
+        app.use(express.json());
+        app.use(express.urlencoded({ extended: true }));
+
+        app.use("/append", appendRoutes);
+        app.use("/tip", tipRoutes);
+
+        // Serve all static assets from the public folder
+        app.use(express.static(path.join(__dirname, "public")));
+
+        // Serve index.html explicitly for root route
+        app.get("/", (req, res) => {
+            res.sendFile(path.join(__dirname, "public", "index.html"));
+        });
+
+        app.listen(config.httpPort, () => {
+            console.log(
+                chalk.green(
+                    `Usher HTTP server listening on port ${config.httpPort}`
+                )
+            );
+        });
         console.log(chalk.green(`Usher gRPC server listening on port ${port}`));
 
         if (!options.root && !options.core) {

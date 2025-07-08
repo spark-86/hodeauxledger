@@ -1,9 +1,8 @@
 import express from "express";
-import { validateAppend } from "../../validators/v1/validateAppend.js";
-import { postAppend } from "../../controllers/v1/appendController.js";
+import { webAppend } from "../../services/v2/webServices.js";
 
 const router = express.Router();
 
-router.post("/", validateAppend, postAppend);
+router.post("/", webAppend);
 
 export default router;

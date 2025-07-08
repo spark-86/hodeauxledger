@@ -120,7 +120,7 @@ async function maybeProcessBootstrap(config, hotKey, initialHash) {
 
         await Ledger.append(signed);
         lastHash = signed.current_hash;
-        fs.writeFileSync(`${config.ledger}/lastHash_.txt`, lastHash);
+        fs.writeFileSync(`${config.ledger}/lastHash.txt`, lastHash);
     }
 }
 
