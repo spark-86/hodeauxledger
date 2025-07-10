@@ -5,15 +5,15 @@
     "type": "object",
     "required": [
         "schema",
-        "key_type",
+        "scope",
         "roles",
         "key"
     ],
     "properties": {
         "schema": {
-            "const": "key"
+            "const": "key:grant:v1"
         },
-        "key_type": {
+        "scope": {
             "type": "string"
         },
         "name": {

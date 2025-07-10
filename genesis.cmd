@@ -1,3 +1,3 @@
 del C:\secrets\*
 del C:\ledger\*
-node usher --genesis
+node usher -v -g --passphrase chaos1201

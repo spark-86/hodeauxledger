@@ -5,6 +5,7 @@ import { Record } from "./recordService.js";
 import { Ledger } from "./ledgerService.js";
 import { loadConfig } from "./configService.js";
 import { Log } from "../../tools/logger.js";
+import { UsherProcessor } from "./usherProcessorService.js";
 
 export const Genesis = {
     async letThereBeLight() {
@@ -19,12 +20,28 @@ export const Genesis = {
             passphrase
         );
         const hotKey = await loadHotKey(config, passphrase);
-
+        console.log(hotKey);
         const genesisRecord = await createGenesisRecord(publicKey);
         const signedGenesis = await Record.sign(genesisRecord, hotKey);
-        await Ledger.append(signedGenesis);
+        const at = Date.now();
+        const usherSignature = await UsherProcessor.signMessage(
+            { ...signedGenesis, at, received_by: publicKey },
+            privateKey
+        );
+        const fullRecord = {
+            ...signedGenesis,
+            at,
+            received_by: await Key.getPublicFromPrivate(hotKey),
+            received_signature: sodium.to_base64(usherSignature),
+        };
+        const hash = await Record.calcCurrentHash(fullRecord);
+        console.dir({ ...fullRecord, current_hash: hash }, { depth: null });
+        await Ledger.append({
+            ...fullRecord,
+            current_hash: hash,
+        });
 
-        await maybeProcessBootstrap(config, hotKey, signedGenesis.current_hash);
+        await maybeProcessBootstrap(config, hotKey, hash);
 
         console.log("Genesis record generated.");
     },
@@ -47,7 +64,7 @@ async function loadOrCreatePassphrase(config) {
 
 async function loadOrCreateMasterKey(config, passphrase) {
     const keyFile = `${config.secrets}/master.enc.json`;
-    const pubFile = `${config.secrets}/master.pub`;
+    const pubFile = `${config.secrets}/master.pub.json`;
 
     if (!fs.existsSync(keyFile)) {
         const { publicKey, privateKey } = await Key.generatePair();
@@ -108,6 +125,7 @@ async function maybeProcessBootstrap(config, hotKey, initialHash) {
             protocol: "v1",
             scope: "",
             fingerprint,
+            nonce: sodium.to_base64(sodium.randombytes_buf(32)),
             record_type: "root:add",
             data: {
                 name: root.name,
@@ -116,10 +134,23 @@ async function maybeProcessBootstrap(config, hotKey, initialHash) {
         };
 
         const signed = await Record.sign(record, hotKey);
-        console.dir(signed, { depth: null });
+        const finalRecord = {
+            ...signed,
+            at: Date.now(),
+            received_by: await Key.getPublicFromPrivate(hotKey),
+        };
+        const usherSign = await UsherProcessor.signMessage(finalRecord, hotKey);
+        const fullRecord = {
+            ...finalRecord,
+            received_signature: sodium.to_base64(usherSign),
+        };
+        const hash = await Record.calcCurrentHash(fullRecord);
+        fullRecord.current_hash = hash;
 
-        await Ledger.append(signed);
-        lastHash = signed.current_hash;
+        console.dir(fullRecord, { depth: null });
+
+        await Ledger.append(fullRecord);
+        lastHash = fullRecord.current_hash;
         fs.writeFileSync(`${config.ledger}/lastHash.txt`, lastHash);
     }
 }

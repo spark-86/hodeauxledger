@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/spark-86/hodeauxledger/blob/master/docs/schema/core/root.add.schema.json",
+    "title": "Root Add",
+    "type": "object",
+    "required": [
+        "key",
+        "ipAddress"
+    ],
+    "properties": {
+        "name": {
+            "type": "string"
+        },
+        "key": {
+            "type": "string"
+        },
+        "ipAddress": {
+            "type": "string"
+        },
+        "port": {
+            "type": "integer"
+        }
+    },
+    "additionalProperties": false
+}

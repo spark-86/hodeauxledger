@@ -3,29 +3,40 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Sign Record - HodeauxLedger</title>
+    <title>Submit Record - HodeauxLedger</title>
+    <link rel="stylesheet" href="index.css" />
 </head>
 
 <body>
-    <h1>Sign Record</h1>
-    <label for="previous_hash">
-        <input type="text" id="previous_hash" placeholder="Previous Hash" />
-        <button id="hashButton">Hash</button>
-    </label>
-    <br />
-    <label for="privateKey">Private Key
-        <input type="text" id="privateKey" placeholder="Private Key" />
-    </label>
-    <br />
-    <label for="jsonPayload">JSON Payload
-        <textarea id="jsonPayload" placeholder='Paste record JSON here'></textarea><br />
-    </label>
-    <br />
-    <button id="signButton">Sign</button>
+    <h1>HodeauxLedger - Sign Record</h1>
+    <div id="recordForm">
+        <label for="previous_hash">Previous Hash
+            <input type="text" id="previous_hash" placeholder="Previous Hash" />
+            <button id="hashButton">Get Hash</button>
+        </label>
+        <label for="protocol">Protocol
+            <select id="protocol">
+                <option value="v1" selected>v1</option>
+            </select>
+        </label>
+        <label for="scope">Scope
+            <input type="text" id="scope" placeholder="Scope" />
+        </label>
+        <label for="record_type">Record Type
+            <input type="text" id="record_type" placeholder="Record Type" />
+        </label>
+        <label for="jsonPayload">JSON Payload
+            <textarea id="jsonPayload" placeholder='Paste record JSON here'></textarea>
+        </label>
+        <label for="privateKey">Private Key
+            <input type="text" id="privateKey" placeholder="Private Key" />
+        </label>
+        <button id="signButton">Sign</button>
 
-    <pre id="output"></pre>
-
-    <script type="module" src="index.js"></script>
+        <pre id="output"></pre>
+        <pre id="network"></pre>
+        <script type="module" src="index.js"></script>
+    </div>
 </body>
 
 </html>

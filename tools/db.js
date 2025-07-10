@@ -1,5 +1,5 @@
 import knex from "knex";
-import { loadConfig } from "../services/v2/configService.js";
+import { loadConfig } from "../tools/v3/config.js";
 
 export const createDb = () => {
     const config = loadConfig();

@@ -7,23 +7,33 @@
     "roots": [
         {
             "name": "Verozaa Inc. Root Trust",
-            "key": "9FNU6ux7T0PTgDPmW1ZRcxfFwXrI3yzB4grzCIQUMUo"
+            "key": "9FNU6ux7T0PTgDPmW1ZRcxfFwXrI3yzB4grzCIQUMUo",
+            "ipAddress": "34.71.60.51",
+            "port": 4000
         },
         {
             "name": "Hodo Ltd. Co. Root Trust",
-            "key": "0o_doEyLmNbHTUapntVv7xivHawHcxGHDAahB7s9XBA"
+            "key": "0o_doEyLmNbHTUapntVv7xivHawHcxGHDAahB7s9XBA",
+            "ipAddress": "34.71.60.51",
+            "port": 5000
         },
         {
             "name": "Spark 86 LLC Root Trust",
-            "key": "dSD4AyZxdwhwpvRZ9hazVsP9_ocY4LAdnK3a0TndckM"
+            "key": "dSD4AyZxdwhwpvRZ9hazVsP9_ocY4LAdnK3a0TndckM",
+            "ipAddress": "34.71.60.51",
+            "port": 6000
         },
         {
             "name": "eMotor.ID Root Trust",
-            "key": "xMTagfSY3rxySlFCCjIyWyhET8ff3apbBP0NCjHswiM"
+            "key": "xMTagfSY3rxySlFCCjIyWyhET8ff3apbBP0NCjHswiM",
+            "ipAddress": "34.71.60.51",
+            "port": 7000
         },
         {
             "name": "VeroSelf Root Trust",
-            "key": "aiWnU8bF8mNqXqr_2MpuLZnIHAlviWhX75WV6d1J0hs"
+            "key": "aiWnU8bF8mNqXqr_2MpuLZnIHAlviWhX75WV6d1J0hs",
+            "ipAddress": "34.71.60.51",
+            "port": 8000
         }
     ],
     "masterScope": {

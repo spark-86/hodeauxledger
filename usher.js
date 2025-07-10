@@ -1,28 +1,22 @@
-import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-import { loadConfig } from "./services/v2/configService.js";
-import { Genesis } from "./services/v2/genesisService.js";
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
-import { ClientBootstrap } from "./services/v2/clientBootstrapService.js";
-import { CoreBootstrap } from "./services/v2/coreBootstrapService.js";
-import { Key } from "./services/v2/keyService.js";
-import { Ledger } from "./services/v2/ledgerService.js";
-import { UsherProcessor } from "./services/v2/usherProcessorService.js";
+import path from "path";
+import chalk from "chalk";
+import { fileURLToPath } from "url";
 import express from "express";
-import { RootBootstrap } from "./services/v2/rootBootstrapService.js";
-import appendRoutes from "./routes/v1/appendRoutes.js";
-import tipRoutes from "./routes/v1/tipRoutes.js";
 
-// Setup paths
+import { Genesis } from "./services/v3/genesisService.js";
+import { Keyring } from "./services/v3/keyringService.js";
+import { loadConfig } from "./tools/v3/config.js";
+import { Ledger } from "./services/v3/ledgerService.js";
+import { StandardStartup } from "./services/v3/standardStartupService.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const protoPath = path.join(__dirname, "./proto/usher.proto");
 
-// CLI
 const program = new Command();
 
 program
@@ -35,66 +29,67 @@ program
         "-g, --genesis",
         "Run genesis. WARNING: Deletes your key if it exists"
     )
-    .option("-c, --config <config>", "Path to config (default is config.json)")
-    .option("-p, --port <port>", "Port for gRPC listener", "50051")
-    .option("-b, --bootstrap <file>", "Bootstrap file (used with genesis)")
+    .option(
+        "-c, --config <config>",
+        "Path to config (default is config.json)",
+        "./config.json"
+    )
+    .option("-p, --port <port>", "Port for gRPC listener", "1984")
     .option("-s, --secrets <path>", "Path for secrets", "/secrets")
     .option("-l, --ledger <path>", "Path for ledger", "/ledger")
     .option("--logfile <path>", "Path for logs (default is ./logs)")
-    .option("-v, --verbose", "Enable verbose logging");
+    .option("-v, --verbose", "Enable verbose logging")
+    .option("--passphrase <passphrase>", "Passphrase for genesis");
 
 program.parse(process.argv);
 const options = program.opts();
 
-// Validate CLI
-if (options.core && options.root) {
-    console.error(chalk.red.bold("Error: Can't be both root and core."));
-    process.exit(1);
-}
-
-// Build overrides
-const overrides = {
-    core: !!options.core,
-    root: !!options.root,
-    genesis: !!options.genesis,
-    ...(options.port && { port: options.port }),
-    ...(options.bootstrap && { bootstrapFile: options.bootstrap }),
-    ...(options.secrets && { secrets: options.secrets }),
-    ...(options.ledger && { ledger: options.ledger }),
-    ...(options.logfile && { logfile: options.logfile }),
-    ...(options.verbose && { verbose: options.verbose }),
+// *** load config
+if (options.verbose) console.log("Loading config...");
+// FIXME: This doesn't work as intended, because the defaults will
+// overwrite the config file
+let overrides = {
+    secrets: options.secrets || "./secrets",
+    ledger: options.ledger || "./ledger",
+    genesis: options.genesis || false,
+    core: options.core || false,
+    root: options.root || false,
+    passphrase: options.passphrase || null,
 };
+if (!fs.existsSync(options.config)) {
+    console.error("Config file not found: " + options.config);
+}
+const config = loadConfig(options.config, overrides);
+console.dir(config, { depth: null });
 
-// Load config
-let config;
-const configPath = options.config || "config.json";
-if (!fs.existsSync(configPath)) {
-    console.error(
-        chalk.red.bold(`Error: Config file not found: ${configPath}`)
-    );
+// *** validate options
+if (options.core && options.root) {
+    console.error("Can't be both root and core.");
     process.exit(1);
 }
-config = loadConfig(configPath, overrides);
 
-// If genesis, run and exit
+// *** flush keyring and ledger
+await Keyring.flush();
+await Ledger.flush();
+
+// *** check to see if we're running Genesis
 if (options.genesis) {
     await Genesis.letThereBeLight();
     process.exit(0);
 }
 
-// Since we aren't running genesis, check to see if the master key
-// is still or has become hot
-if (fs.existsSync(config.secrets + "/master.hot.json")) {
+// *** master key check
+const hotKeyPath = path.join(config.secrets, "master.hot.json");
+if (fs.existsSync(hotKeyPath)) {
     console.error("*** MASTER KEY IS HOT ON STARTUP! ***");
     console.log(
         chalk.red.bold("ERROR!") +
             " This is a HUGE security issue. Either remove the hot master key or run genesis again."
     );
-    console.log("This application will close due to security.");
     process.exit(69);
 }
 
-// gRPC setup
+//*** set up gRPC
 const packageDef = protoLoader.loadSync(protoPath, {
     keepCase: true,
     longs: String,
@@ -105,25 +100,21 @@ const packageDef = protoLoader.loadSync(protoPath, {
 const proto = grpc.loadPackageDefinition(packageDef);
 const UsherService = proto.usher.UsherSync;
 
-const server = new grpc.Server();
+const buildGrpcHandlers = () => {
+    return {
+        send(call, callback) {
+            let finalRequest;
 
-// Implement your RPC handlers here
-server.addService(UsherService.service, {
-    send(call, callback) {
-        let finalRequest;
+            call.on("data", (chunk) => {
+                console.log("Received chunk:", chunk);
+                finalRequest = chunk; // Can accumulate here if needed
+            });
 
-        call.on("data", (request) => {
-            console.log("Received chunk:", request);
-            finalRequest = request; // you can accumulate if you want
-        });
-
-        call.on("end", () => {
-            (async () => {
+            call.on("end", async () => {
                 try {
                     const response = await UsherProcessor.processIncoming(
                         finalRequest
                     );
-                    console.log(response);
                     callback(null, response);
                 } catch (err) {
                     console.error("Processing error:", err);
@@ -132,70 +123,51 @@ server.addService(UsherService.service, {
                         message: "Internal processing error",
                     });
                 }
-            })();
-        });
+            });
 
-        call.on("error", (err) => {
-            console.error("Stream error:", err);
-        });
-    },
+            call.on("error", (err) => {
+                console.error("Stream error:", err);
+            });
+        },
 
-    receive(call, callback) {
-        console.log("Received receive request:", call.request);
-        callback(null, { message: "Here is your data." });
-    },
-});
+        receive(call, callback) {
+            console.log("Received receive request:", call.request);
+            callback(null, { message: "Here is your data." });
+        },
+    };
+};
+const server = new grpc.Server();
+server.addService(UsherService.service, buildGrpcHandlers());
 
-// Flush the cached db
-await Key.ringFlush();
-await Ledger.flush();
-
-// Start the server
-const bindAddress = `0.0.0.0:${options.port || 1978}`;
+// *** start gRPC
+const bindAddress = `0.0.0.0:${options.port}`;
 server.bindAsync(
     bindAddress,
     grpc.ServerCredentials.createInsecure(),
     (err, port) => {
         if (err) {
-            console.error("Failed to start server:", err);
+            console.error("Failed to start gRPC server:", err);
             process.exit(1);
         }
 
-        // Boot webserver now for admin UI
         const app = express();
         app.use(express.json());
         app.use(express.urlencoded({ extended: true }));
 
-        app.use("/append", appendRoutes);
-        app.use("/tip", tipRoutes);
-
-        // Serve all static assets from the public folder
         app.use(express.static(path.join(__dirname, "public")));
+        app.get("/", (_, res) =>
+            res.sendFile(path.join(__dirname, "public/index.html"))
+        );
 
-        // Serve index.html explicitly for root route
-        app.get("/", (req, res) => {
-            res.sendFile(path.join(__dirname, "public", "index.html"));
-        });
-
-        app.listen(config.httpPort, () => {
+        app.listen(config.httpPort, () =>
             console.log(
                 chalk.green(
                     `Usher HTTP server listening on port ${config.httpPort}`
                 )
-            );
-        });
+            )
+        );
+
         console.log(chalk.green(`Usher gRPC server listening on port ${port}`));
-
-        if (!options.root && !options.core) {
-            ClientBootstrap.start(UsherService);
-        }
-
-        if (options.root) {
-            RootBootstrap.start(UsherService);
-        }
-
-        if (options.core) {
-            CoreBootstrap.start();
-        }
+        if (!options.core && !options.root) StandardStartup.start();
     }
 );

@@ -19,10 +19,7 @@ export const UsherProcessor = {
         if (typeof data === "string") data = JSON.parse(jsonPayload);
         else data = jsonPayload;
         console.log(data);
-        const parsedData = JSON.parse(data.payload);
-        data.payload = {
-            ...parsedData,
-        };
+
         if (config.verbose) console.dir(data, { depth: null });
         if (config.verbose) console.log("Checking if already hashed.");
         if (data.current_hash)
@@ -51,9 +48,10 @@ export const UsherProcessor = {
                 data.fingerprint
             );
             if (!verified) return false;
-
+            if (config.verbose) console.log("VERIFIED MUTHAFUKKA!");
             // Is this an usher control record?
-            if (data.record_type.startsWith("usher:")) {
+            console.log(data);
+            if (data.payload.record_type.startsWith("usher:")) {
                 return "Uhhhh.... haven't come up with this schema yet";
             } else {
                 // we've verified it, but is it valid for the
@@ -83,20 +81,26 @@ export const UsherProcessor = {
                 if (config.verbose) console.log("Signing record via Usher");
                 const privateKey = await Key.privateKeyFromDisk(
                     config.secrets,
-                    "usherSigning"
+                    "usher"
                 );
-                const signature = await this.usherSign(newData, privateKey);
+                const signature = sodium.to_base64(
+                    await this.usherSign(newData, privateKey)
+                );
 
-                const hashed = await Record.calcCurrentHash(
-                    canonicalize({
-                        ...newData,
-                        received_by: await Key.getPublicFromPrivate(privateKey),
-                        received_signature: signature,
-                    })
+                const recordToHash = {
+                    ...newData.payload,
+                    received_by: await Key.getPublicFromPrivate(privateKey),
+                    received_signature: signature,
+                };
+                const hashed = sodium.to_base64(
+                    await Record.calcCurrentHash(canonicalize(recordToHash))
                 );
 
                 if (config.verbose) console.log("Appending to ledger...");
-                await Ledger.append(hashed);
+                await Ledger.append({
+                    ...recordToHash,
+                    current_hash: hashed,
+                });
                 return "It worked?!";
             }
         }
@@ -135,7 +139,10 @@ export const UsherProcessor = {
     async usherSign(data, privateKey) {
         await sodium.ready;
         const messageBytes = sodium.from_string(canonicalize(data));
-        const signature = sodium.crypto_sign_detached(messageBytes, privateKey);
+        const signature = sodium.crypto_sign_detached(
+            messageBytes,
+            sodium.from_base64(privateKey)
+        );
         return signature;
     },
 };

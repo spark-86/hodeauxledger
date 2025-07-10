@@ -72,14 +72,14 @@ export const Record = {
             protocol: data.protocol,
             scope: data.scope,
             nonce: data.nonce,
-            at: data.at,
+            //at: data.at,
             fingerprint: data.fingerprint,
             record_type: data.record_type,
             data: data.data,
         };
 
         if (config.verbose) console.dir(recordToVerify, { depth: null });
-
+        console.log();
         const canonical = canonicalize(recordToVerify);
         const messageBytes = sodium.from_string(canonical);
         const signatureBytes = sodium.from_base64(data.signature);

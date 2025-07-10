@@ -10,6 +10,8 @@ export const Ledger = {
     async append(data) {
         const config = loadConfig();
 
+        if (config.verbose) console.dir(data, { depth: null });
+
         // Make sure this is a complete record
         if (!data.protocol) throw new Error("No protocol provided");
         if (data.protocol === "v1") {
@@ -30,7 +32,8 @@ export const Ledger = {
         // Make sure we are matching hashes
         if (data.record_type !== "genesis") {
             const tip = await this.getTip(data.scope);
-
+            console.log("Tip: " + tip);
+            console.log("Previous hash: " + data.previous_hash);
             if (tip) {
                 if (tip !== data.previous_hash)
                     throw new Error("Previous hash mismatch");
@@ -141,26 +144,19 @@ export const Ledger = {
 
     async updateTip(data) {
         const config = loadConfig();
-        fs.writeFileSync(
-            config.ledger +
-                "/" +
-                data.scope +
-                "/" +
-                lastHash +
-                data.scope +
-                ".txt",
-            data.current_hash
-        );
+        const dir = data.scope
+            ? `${config.ledger}/${data.scope}`
+            : config.ledger;
+        const fileName = dir + "/lastHash.txt";
+        fs.writeFileSync(fileName, data.current_hash);
     },
 
     async getTip(scope) {
         const config = loadConfig();
-
-        if (fs.existsSync(config.ledger + "/lastHash_" + scope + ".txt")) {
-            const lastHash = fs.readFileSync(
-                config.ledger + "/lastHash_" + scope + ".txt",
-                "utf8"
-            );
+        const dir = scope ? `${config.ledger}/${scope}` : config.ledger;
+        const fileName = dir + "/lastHash.txt";
+        if (fs.existsSync(fileName)) {
+            const lastHash = fs.readFileSync(fileName, "utf8");
             return lastHash;
         } else {
             throw new Error("Scope not found");
