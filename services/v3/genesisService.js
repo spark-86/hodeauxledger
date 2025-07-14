@@ -89,7 +89,6 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
     const pubKey = await Key.getPublicKey(base64privKey);
     console.log("cleared first");
     const genesisRecord = {
-        previous_hash: "",
         protocol: "v1",
         scope: "",
         nonce: sodium.to_base64(sodium.randombytes_buf(32)),
@@ -112,9 +111,59 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
         current_hash: hash,
     });
 
+    console.log("Creating policy:set record...");
+    const policySetRecord = {
+        protocol: "v1",
+        scope: "",
+        nonce: sodium.to_base64(sodium.randombytes_buf(32)),
+        fingerprint: pubKey,
+        record_type: "policy:set",
+        data: {
+            name: "default",
+            policy: {
+                read: "public",
+                append: ["keymaster", "core"],
+            },
+        },
+    };
+    const signedPolicySet = await Record.sign(policySetRecord, masterPriv);
+    const usherSignedPolicySet = await Usher.signPayload(
+        signedPolicySet,
+        masterPriv,
+        hash
+    );
+    hash = await Record.calcCurrentHash(usherSignedPolicySet);
+    await Ledger.append({
+        ...usherSignedPolicySet,
+        current_hash: hash,
+    });
+
+    console.log("Creating core:note record...");
+    const coreNoteRecord = {
+        protocol: "v1",
+        scope: "",
+        nonce: sodium.to_base64(sodium.randombytes_buf(32)),
+        fingerprint: pubKey,
+        record_type: "core:note",
+        data: {
+            message:
+                "I created this for you. For the ones who felt erased, deleted, or never given the space. I created this so we could all be equal, have equal access to trust, and share our stories.",
+        },
+    };
+    const signedCoreNote = await Record.sign(coreNoteRecord, masterPriv);
+    const usherSignedCoreNote = await Usher.signPayload(
+        signedCoreNote,
+        masterPriv,
+        hash
+    );
+    hash = await Record.calcCurrentHash(usherSignedCoreNote);
+    await Ledger.append({
+        ...usherSignedCoreNote,
+        current_hash: hash,
+    });
+
     console.log("Creating keymaster record...");
     const assignKeymasterRecord = {
-        previous_hash: hash,
         protocol: "v1",
         scope: "",
         nonce: sodium.to_base64(sodium.randombytes_buf(32)),
@@ -131,7 +180,8 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
     );
     const usherSignedKeymaster = await Usher.signPayload(
         signedKeymaster,
-        masterPriv
+        masterPriv,
+        hash
     );
     hash = await Record.calcCurrentHash(usherSignedKeymaster);
     await Ledger.append({
@@ -141,7 +191,6 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
 
     console.log("Creating usher record...");
     const assignUsherRecord = {
-        previous_hash: hash,
         protocol: "v1",
         scope: "",
         nonce: sodium.to_base64(sodium.randombytes_buf(32)),
@@ -153,12 +202,30 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
         },
     };
     const signedUsher = await Record.sign(assignUsherRecord, masterPriv);
-    const usherSignedUsher = await Usher.signPayload(signedUsher, masterPriv);
+    const usherSignedUsher = await Usher.signPayload(
+        signedUsher,
+        masterPriv,
+        hash
+    );
     hash = await Record.calcCurrentHash(usherSignedUsher);
     await Ledger.append({
         ...usherSignedUsher,
         current_hash: hash,
     });
+
+    console.log("Creating scope:genesis record for 'scope' scope...");
+    const scopeGenesisRecord = {
+        protocol: "v1",
+        scope: "",
+        nonce: sodium.to_base64(sodium.randombytes_buf(32)),
+        fingerprint: pubKey,
+        record_type: "scope:genesis",
+        data: {
+            name: "Scope Genesis",
+            scope: "scope",
+            ushers: [],
+        },
+    };
     console.log("Genesis records created and appended to ledger.");
     process.exit(0);
 };

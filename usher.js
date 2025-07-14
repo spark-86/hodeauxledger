@@ -12,6 +12,9 @@ import { Keyring } from "./services/v3/keyringService.js";
 import { loadConfig } from "./tools/v3/config.js";
 import { Ledger } from "./services/v3/ledgerService.js";
 import { StandardStartup } from "./services/v3/standardStartupService.js";
+import { GrpcProtocol } from "./services/v3/grpcProtocolService.js";
+import { Disk } from "./services/v3/diskService.js";
+import { Cache } from "./services/v3/cacheService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -68,6 +71,10 @@ if (options.core && options.root) {
     process.exit(1);
 }
 
+// *** make sure sqlite is setup correctly.
+await Cache.buildKeyringCacheTable();
+await Cache.buildRecordCacheTable();
+
 // *** flush keyring and ledger
 await Keyring.flush();
 await Ledger.flush();
@@ -112,9 +119,8 @@ const buildGrpcHandlers = () => {
 
             call.on("end", async () => {
                 try {
-                    const response = await UsherProcessor.processIncoming(
-                        finalRequest
-                    );
+                    console.dir(finalRequest, { depth: null });
+                    const response = GrpcProtocol.receiveMessage(finalRequest);
                     callback(null, response);
                 } catch (err) {
                     console.error("Processing error:", err);
@@ -128,11 +134,6 @@ const buildGrpcHandlers = () => {
             call.on("error", (err) => {
                 console.error("Stream error:", err);
             });
-        },
-
-        receive(call, callback) {
-            console.log("Received receive request:", call.request);
-            callback(null, { message: "Here is your data." });
         },
     };
 };
@@ -159,6 +160,11 @@ server.bindAsync(
             res.sendFile(path.join(__dirname, "public/index.html"))
         );
 
+        app.get("/test", async (_, res) => {
+            const scope = await Disk.loadScopeFromDisk("");
+            console.dir(scope, { depth: null });
+            return res.status(200).json({ scope });
+        });
         app.listen(config.httpPort, () =>
             console.log(
                 chalk.green(

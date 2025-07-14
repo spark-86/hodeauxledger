@@ -1,6 +1,8 @@
 import { createDb } from "../../tools/db.js";
+import { Disk } from "./diskService.js";
 
 const keyringTable = "keyring";
+const myKeys = [];
 
 export const Keyring = {
     /**
@@ -55,5 +57,15 @@ export const Keyring = {
     async flush() {
         const db = createDb();
         await db(keyringTable).delete();
+    },
+
+    async getMyKeys() {
+        const masterKey = await Disk.getKeyFromFile("master");
+        const keymasterKey = await Disk.getKeyFromFile("keymaster");
+        const usherKey = await Disk.getKeyFromFile("usher");
+        myKeys.push({ name: "master", key: masterKey });
+        myKeys.push({ name: "keymaster", key: keymasterKey });
+        myKeys.push({ name: "usher", key: usherKey });
+        return myKeys;
     },
 };

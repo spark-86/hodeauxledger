@@ -2,6 +2,8 @@ import fs from "fs";
 import { loadConfig } from "../../tools/v3/config.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import { Record } from "./recordService.js";
+import { hex2base32 } from "../../tools/base32.js";
 
 export const Disk = {
     /**
@@ -38,7 +40,14 @@ export const Disk = {
 
         // Sanitize input to prevent directory traversal
         const safeScope = scope?.replace(/[^a-zA-Z0-9_\-]/g, "_") ?? "";
-        const safeHash = record.previous_hash.replace(/[^a-zA-Z0-9_\-]/g, "_");
+        const safeHash =
+            record.record_type !== "genesis"
+                ? hex2base32(
+                      Buffer.from(record.previous_hash, "base64").toString(
+                          "hex"
+                      )
+                  )
+                : "genesis";
 
         const targetDir = scope ? path.join(ledgerPath, safeScope) : ledgerPath;
 
@@ -109,5 +118,53 @@ export const Disk = {
             return JSON.parse(
                 fs.readFileSync(`${config.secrets}/${keyType}.pub.json`)
             );
+    },
+
+    async loadScopeFromDisk(scopeName, verify = true, hash = "genesis") {
+        const config = loadConfig();
+        const scope = [];
+        const dir =
+            scope.length > 0 ? `${config.ledger}/${scopeName}` : config.ledger;
+        const fileName = dir + "/" + hash + ".json";
+
+        console.log("Loading scope genesis:");
+
+        if (!fs.existsSync(fileName))
+            throw new Error("Couldn't get scope from hash: " + fileName);
+        const genesis = JSON.parse(fs.readFileSync(fileName));
+        if (verify) {
+            const verified = await Record.verify(genesis, genesis.data.key);
+            if (!verified) throw new Error("Couldn't verify genesis of scope.");
+        }
+        scope.push(genesis);
+        let done = false;
+        let lastHash = genesis.current_hash;
+        while (!done) {
+            const base32hash = hex2base32(
+                Buffer.from(lastHash, "base64").toString("hex")
+            );
+            if (!fs.existsSync(`${dir}/${base32hash}.json`)) {
+                done = true;
+            } else {
+                console.log("Processing " + base32hash);
+                const workingNode = JSON.parse(
+                    fs.readFileSync(`${dir}/${base32hash}.json`)
+                );
+
+                if (verify) {
+                    const verified = await Record.verify(
+                        workingNode,
+                        workingNode.fingerprint
+                    );
+                    if (!verified)
+                        throw new Error(
+                            `Couldn't verify record #${base32hash}`
+                        );
+                }
+                scope.push(workingNode);
+                lastHash = workingNode.current_hash;
+            }
+        }
+        return scope;
     },
 };

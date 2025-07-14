@@ -7,6 +7,8 @@ import { RecordTypeKey } from "./recordTypeKeyService.js";
 export const Record = {
     async sign(data, privateKey) {
         await sodium.ready;
+        console.log("Signing the following:");
+        console.dir(data, { depth: null });
         const messageBytes = sodium.from_string(canonicalize(data));
         const signature = sodium.crypto_sign_detached(messageBytes, privateKey);
         return {
@@ -25,7 +27,6 @@ export const Record = {
     async verify(data, publicKey) {
         await sodium.ready;
         const recordToVerify = {
-            previous_hash: data.previous_hash,
             protocol: data.protocol,
             scope: data.scope,
             nonce: data.nonce,
@@ -33,6 +34,8 @@ export const Record = {
             record_type: data.record_type,
             data: data.data,
         };
+        console.log("Verifying this record:");
+        console.dir(recordToVerify, { depth: null });
         const canonical = canonicalize(recordToVerify);
         const messageBytes = sodium.from_string(canonical);
         const signatureBytes = sodium.from_base64(data.signature);

@@ -2,9 +2,11 @@ import chalk from "chalk";
 import { loadConfig } from "../../tools/v3/config";
 import fs from "fs";
 import path from "path";
+import { GrpcProtocol } from "./grpcProtocolService";
 
 let masterPublicKey = null;
 let usherPrivateKey = null;
+let keymasterPrivateKey = null;
 
 export const CoreStartup = {
     async start() {
@@ -15,6 +17,9 @@ export const CoreStartup = {
         checkKeys();
         if (config.verbose) console.log("Keys are good");
 
+        if (config.verbose) console.log("Pinging roots...");
+        pingRoots();
+
         console.log("Core startup sequence complete.");
     },
 };
@@ -24,6 +29,7 @@ const checkKeys = () => {
     const __dirname = new URL(config.secrets, import.meta.url).pathname;
     const hotKeyPath = path.join(__dirname, "master.hot.json");
     const usherKeyPath = path.join(__dirname, "usher.hot.json");
+    const keymasterKeyPath = path.join(__dirname, "keymaster.hot.json");
     if (fs.existsSync(hotKeyPath)) {
         console.error("*** MASTER KEY IS HOT ON STARTUP! ***");
         console.log(
@@ -39,10 +45,29 @@ const checkKeys = () => {
                 " This key is required to sign basic protocol packets. If it's missing... well, you're probably not just having a bad day — you're having a structural failure."
         );
     }
+    if (!fs.existsSync(keymasterKeyPath)) {
+        console.error("*** KEYMASTER KEY NOT FOUND! ***");
+        console.log(
+            chalk.red.bold("ERROR!") +
+                " Sooooo yeah. The key that grants other keys? Gone. This is where you stare into the void for a bit."
+        );
+    }
     masterPublicKey = fs.readFileSync(
         path.join(__dirname, "master.pub.json")
     ).key;
     usherPrivateKey = JSON.parse(
         fs.readFileSync(path.join(__dirname, "usher.hot.json"))
     ).key;
+    keymasterPrivateKey = fs.readFileSync(
+        path.join(__dirname, "keymaster.hot.json")
+    ).key;
+};
+
+const pingRoots = async () => {
+    const message = await GrpcProtocol.composeMessage("ping", {
+        scope: "",
+        data: {
+            schema: "ping",
+        },
+    });
 };

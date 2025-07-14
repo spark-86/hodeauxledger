@@ -17,6 +17,12 @@
 -   320: Record(s) not found
 -   330: Request too large. Data exceeds 1k.
 
+## 4xx - Client Error
+
+-   400: Requested message failed verification
+
+## 5xx - Server Error
+
 ## 9xx - Severe Error
 
 -   999: Unknown system error. This is what it defaults to when the listener doesn't set a value.

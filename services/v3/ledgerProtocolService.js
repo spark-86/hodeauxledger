@@ -40,7 +40,6 @@ export const LedgerProtocol = {
 
         // Validate the record structure
         const requiredFields = [
-            "previous_hash",
             "protocol",
             "scope",
             "nonce",

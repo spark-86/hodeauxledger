@@ -20,7 +20,6 @@ function canonicalize(obj) {
 }
 
 document.getElementById("signButton").addEventListener("click", async () => {
-    const previous_hash = document.getElementById("previous_hash").value.trim();
     const protocol = document.getElementById("protocol").value.trim();
     const scope = document.getElementById("scope").value.trim();
     const nonce = sodium.to_base64(sodium.randombytes_buf(32));
@@ -37,7 +36,6 @@ document.getElementById("signButton").addEventListener("click", async () => {
     try {
         const privateKey = sodium.from_base64(base64Key);
         const record = {
-            previous_hash,
             protocol,
             scope,
             nonce,
@@ -69,20 +67,6 @@ document.getElementById("signButton").addEventListener("click", async () => {
 document.getElementById("hashButton").addEventListener("click", async () => {
     document.getElementById("previous_hash").value = await getTheTip("");
 });
-
-const getTheTip = async (scope) => {
-    const res = await fetch(`${window.location.origin}/tip/${scope}`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    if (res.ok) {
-        const data = await res.json();
-        return data.hash;
-    } else {
-    }
-};
 
 const submit = async (data) => {
     const res = await fetch(`${window.location.origin}/append/${data.scope}`, {

@@ -3,11 +3,5 @@
     "secrets": "/secrets",
     "ledger": "/ledger",
     "logfile": "./logs/hodeaux.log",
-    "db": {
-        "host": "localhost",
-        "user": "hodeaux",
-        "password": "chaos1201",
-        "port": 3306,
-        "name": "hodeaux"
-    }
+    "cacheFile": "./cache.db"
 }

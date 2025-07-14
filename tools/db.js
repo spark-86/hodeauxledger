@@ -4,6 +4,8 @@ import { loadConfig } from "../tools/v3/config.js";
 export const createDb = () => {
     const config = loadConfig();
 
+    /*
+    // Old connection back when we were using MariaDB
     const db = knex({
         client: "mysql2",
         connection: {
@@ -13,6 +15,14 @@ export const createDb = () => {
             password: config.db.password || "",
             database: config.db.database || "ledger",
         },
+    });*/
+    const db = knex({
+        client: "sqlite3",
+        connection: {
+            filename: "./cache.db",
+        },
+        useNullAsDefault: true,
     });
+
     return db;
 };
