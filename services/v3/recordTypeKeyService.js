@@ -13,11 +13,19 @@ export const RecordTypeKey = {
     async grant(record) {
         // TODO: make sure we are matching the schema for key.grant
 
+        console.log("Adding 🔑");
         await Keyring.add(
             record.scope,
             record.data.key,
             record.data.roles,
             record.data.exp ?? 0
         );
+    },
+
+    async revoke(record) {
+        // Make sure the one that revoked it can actually revoke it I guess
+
+        console.log("Revoking 🔑");
+        await Keyring.revoke(record.scope, record.data.key);
     },
 };

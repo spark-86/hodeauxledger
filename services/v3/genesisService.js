@@ -147,7 +147,17 @@ const createGenesisRecords = async (masterPriv, keymaster, usherPub) => {
         record_type: "core:note",
         data: {
             message:
-                "I created this for you. For the ones who felt erased, deleted, or never given the space. I created this so we could all be equal, have equal access to trust, and share our stories.",
+                "I built this for you.\n" +
+                "For the ones who were erased, overwritten, ignored, or never given the space to begin.\n\n" +
+                "I built this so none of us would have to beg to be seen,\n" +
+                "so we could speak our truth and sign our names—without permission.\n\n" +
+                "I built this so trust could be equal. So access could be fair.\n" +
+                "So memory could be permanent, not controlled.\n\n" +
+                "This is for the quiet ones. The misfit ones. The deleted and the doubted.\n\n" +
+                "You are remembered here.\n" +
+                "You are valid here.\n" +
+                "You are visible - forever.\n\n" +
+                "With all the love, - Veronica",
         },
     };
     const signedCoreNote = await Record.sign(coreNoteRecord, masterPriv);

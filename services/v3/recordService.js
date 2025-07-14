@@ -34,7 +34,7 @@ export const Record = {
             record_type: data.record_type,
             data: data.data,
         };
-        console.log("Verifying this record:");
+        console.log("Verifying this R⬢:");
         console.dir(recordToVerify, { depth: null });
         const canonical = canonicalize(recordToVerify);
         const messageBytes = sodium.from_string(canonical);
@@ -54,7 +54,7 @@ export const Record = {
 
     async processRecord(data) {
         if (!data.protocol)
-            throw new Error("No protocol provided in record: " + data);
+            throw new Error("No protocol provided in R⬢: " + data);
         if (data.protocol === "v1") {
             const category = data.record_type.split(":");
             switch (category[0]) {
@@ -67,7 +67,7 @@ export const Record = {
                     await RecordTypeKey.process(data);
                     break;
                 default:
-                    console.log("Unknown record type: " + data.record_type);
+                    console.log("Unknown R⬢ type: " + data.record_type);
             }
         }
     },

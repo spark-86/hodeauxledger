@@ -1,8 +1,12 @@
 import chalk from "chalk";
-import { loadConfig } from "../../tools/v3/config";
+import { loadConfig } from "../../tools/v3/config.js";
 import fs from "fs";
 import path from "path";
-import { GrpcProtocol } from "./grpcProtocolService";
+import { GrpcProtocol } from "./grpcProtocolService.js";
+import { Disk } from "./diskService.js";
+import { RecordTypeKey } from "./recordTypeKeyService.js";
+import { RecordTypePolicy } from "./recordTypePolicyService.js";
+import { fileURLToPath } from "url";
 
 let masterPublicKey = null;
 let usherPrivateKey = null;
@@ -17,6 +21,11 @@ export const CoreStartup = {
         checkKeys();
         if (config.verbose) console.log("Keys are good");
 
+        if (config.verbose) console.log("Loading root scope...");
+        const scopeData = await Disk.loadScopeFromDisk("", true, "genesis");
+        for (const data of scopeData) {
+            await startupHandler(data);
+        }
         if (config.verbose) console.log("Pinging roots...");
         pingRoots();
 
@@ -26,10 +35,11 @@ export const CoreStartup = {
 
 const checkKeys = () => {
     const config = loadConfig();
-    const __dirname = new URL(config.secrets, import.meta.url).pathname;
+    const __dirname = fileURLToPath(new URL(config.secrets, import.meta.url));
     const hotKeyPath = path.join(__dirname, "master.hot.json");
     const usherKeyPath = path.join(__dirname, "usher.hot.json");
     const keymasterKeyPath = path.join(__dirname, "keymaster.hot.json");
+    console.log("keyfiles: ", hotKeyPath, usherKeyPath, keymasterKeyPath);
     if (fs.existsSync(hotKeyPath)) {
         console.error("*** MASTER KEY IS HOT ON STARTUP! ***");
         console.log(
@@ -70,4 +80,18 @@ const pingRoots = async () => {
             schema: "ping",
         },
     });
+};
+
+const startupHandler = async (record) => {
+    // We're just kinda parsing the root scope, so no need to go all out on records here
+    switch (record.record_type) {
+        case "key:grant":
+            await RecordTypeKey.grant(record);
+            break;
+        case "key:revoke":
+            await RecordTypeKey.revoke(record);
+            break;
+        case "policy:set":
+            await RecordTypePolicy.set(record);
+    }
 };

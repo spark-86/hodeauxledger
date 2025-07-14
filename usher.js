@@ -15,6 +15,7 @@ import { StandardStartup } from "./services/v3/standardStartupService.js";
 import { GrpcProtocol } from "./services/v3/grpcProtocolService.js";
 import { Disk } from "./services/v3/diskService.js";
 import { Cache } from "./services/v3/cacheService.js";
+import { CoreStartup } from "./services/v3/coreStartupService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -174,6 +175,7 @@ server.bindAsync(
         );
 
         console.log(chalk.green(`Usher gRPC server listening on port ${port}`));
+        if (options.core) CoreStartup.start();
         if (!options.core && !options.root) StandardStartup.start();
     }
 );
