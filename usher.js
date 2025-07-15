@@ -59,6 +59,7 @@ let overrides = {
     core: options.core || false,
     root: options.root || false,
     passphrase: options.passphrase || null,
+    verbose: options.verbose,
 };
 if (!fs.existsSync(options.config)) {
     console.error("Config file not found: " + options.config);

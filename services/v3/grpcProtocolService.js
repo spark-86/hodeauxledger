@@ -91,7 +91,13 @@ export const GrpcProtocol = {
             ...message,
         };
         delete messageToVerify.signature;
-        if (!(await this.verify(messageToVerify))) {
+        if (
+            !(await this.verify(
+                messageToVerify,
+                messageToVerify.fingerprint,
+                message.signature
+            ))
+        ) {
             return this.sign({
                 ...response,
                 payload: {
@@ -123,7 +129,7 @@ export const GrpcProtocol = {
             console.dir(message, { depth: null });
         }
         const privateKey = await Disk.getKeyFromFile("usher", true).key;
-
+        console.log(privateKey);
         const messageBytes = sodium.from_string(JSON.stringify(message));
         const signature = sodium.crypto_sign_detached(
             messageBytes,

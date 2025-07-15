@@ -105,6 +105,12 @@ export const Disk = {
      */
     async getKeyFromFile(keyType, privateKey = false) {
         const config = loadConfig();
+        const __dirname = fileURLToPath(
+            new URL(config.secrets, import.meta.url)
+        );
+        const __file = privateKey
+            ? keyType + ".enc.json"
+            : keyType + ".pub.json";
         if (privateKey)
             if (!fs.existsSync(`${config.secrets}/${keyType}.enc.json`))
                 throw new Error("Key not found");
