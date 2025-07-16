@@ -12,6 +12,8 @@ It’s not a blockchain.
 It’s not a cryptocurrency.
 **It’s a protocol for memory.**
 
+Please a little on the theory behind all this in our doc on [Temporal Cryptophysics](docs/temporal_cryptophyiscs.md).
+
 ## 🧬 Why it exists
 
 Because consensus can be gamed.
@@ -34,17 +36,14 @@ Every record is a R⬢ — a minimal, standalone, hash-chained object.
 
 Each R⬢ includes:
 
--   _`previous_hash`_ - The base64 hash of the previous record
--   **_`protocol`_** - The current version of the record being appended
--   **_`scope`_** - The hierarchical scope of the record (e.g., `self`, `public`, `private`)
--   **_`nonce`_** - A random value to prevent replay attacks
--   _`at`_ - The timestamp of when the record was created, in JS time format
--   **_`fingerprint`_** - The base64 public ed25519 key
--   **_`record_type`_** - A string representing the type of record (e.g., `key:grant`, `policy:set`, `scope:create`)
--   **_`data`_** - a freeform object, typically assumed to have a `schema` field in the object that can be used to validate the data structure
--   _`signature`_ - Base64 signature of the **bold** fields canonicalized per the RFC 8785 scheme.
--   _`received_by`_ - Base64 public key of transport usher
--   `received_signature` - Base64 signature of the received record (_italicized_)
+-   `previous_hash` - The base64 hash of the previous record
+-   **`protocol`** - The current version of the record being appended
+-   **`scope`** - The hierarchical scope of the record (e.g., `self`, `public`, `private`)
+-   **`nonce`** - A random value to prevent replay attacks
+-   `at` - The timestamp of when the record was created, in JS time format
+-   **`record_type`** - A string representing the type of record (e.g., `key:grant`, `policy:set`, `scope:create`)
+-   **`data`** - a freeform object, typically assumed to have a `schema` field in the object that can be used to validate the data structure
+-   `signatures` – Array of objects [{ fingerprint, signature, type }]. Each signature is a Base64 Ed25519 signature over the record’s canonical JSON (RFC 8785) that includes the signer’s own fingerprint and type; common type values are owner, quorum, and relay
 -   `current_hash` - SHA256 base64 hash of the whole record.
 
 Signatures are Ed25519.
