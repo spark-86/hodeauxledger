@@ -12,7 +12,7 @@ It’s not a blockchain.
 It’s not a cryptocurrency.
 **It’s a protocol for memory.**
 
-Please a little on the theory behind all this in our doc on [Temporal Cryptophysics](docs/temporal_cryptophyiscs.md).
+Please read a little on the theory behind all this in our doc on [Temporal Cryptophysics](docs/temporal_cryptophyiscs.md).
 
 ## 🧬 Why it exists
 
