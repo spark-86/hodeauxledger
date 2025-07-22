@@ -39,9 +39,14 @@ document.getElementById("signButton").addEventListener("click", async () => {
             protocol,
             scope,
             nonce,
-            fingerprint,
             record_type: recordType,
             data: JSON.parse(recordJson),
+            signatures: [
+                {
+                    fingerprint,
+                    type: "owner",
+                },
+            ],
         };
 
         // Canonicalize the record (you must use same method as the backend!)
@@ -53,19 +58,21 @@ document.getElementById("signButton").addEventListener("click", async () => {
 
         const signed = {
             ...record,
-            signature: signatureBase64,
+            signatures: [
+                {
+                    fingerprint,
+                    type: "owner",
+                    signature: signatureBase64,
+                },
+            ],
         };
 
         output.textContent = JSON.stringify(signed, null, 2);
         network.textContent = "🟢 Contating localhost...";
         network.textContent = await submit({ ...signed });
     } catch (err) {
-        output.textContent = `❌ Error: ${err.message}`;
+        output.textContent = `❌ Error: ${err}`;
     }
-});
-
-document.getElementById("hashButton").addEventListener("click", async () => {
-    document.getElementById("previous_hash").value = await getTheTip("");
 });
 
 const submit = async (data) => {

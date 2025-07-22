@@ -1,5 +1,5 @@
 import knex from "knex";
-import { loadConfig } from "../tools/v3/config.js";
+import { loadConfig } from "./v4/config.js";
 
 export const createDb = () => {
     const config = loadConfig();
@@ -19,7 +19,7 @@ export const createDb = () => {
     const db = knex({
         client: "sqlite3",
         connection: {
-            filename: "./cache.db",
+            filename: config.cacheFile,
         },
         useNullAsDefault: true,
     });

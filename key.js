@@ -1,120 +1,61 @@
-/*****
- * Key management tool
- */
 import fs from "fs";
-import { loadConfig } from "./services/v2/configService.js";
 import { Command } from "commander";
-import crypto from "crypto";
-import { Key } from "./services/v2/keyService.js";
+
+import { loadConfig } from "./tools/v4/config.js";
+import { Disk } from "./services/v4/diskService.js";
+import { Key } from "./services/v4/keyService.js";
 import sodium from "libsodium-wrappers-sumo";
-import chalk from "chalk";
 
 await sodium.ready;
-
 const program = new Command();
 program
     .name("key")
-    .description("Key management tool")
+    .description("Manage keys")
     .version("0.0.1")
-    .option("-c, --config <config>", "Config file", "config.json")
-    .option("-h, --help", "Show help")
+    .argument("<keyname>", "Key name (e.g.: master, keymaster, usher)")
+    .option("-c, --config <config_file>", "Configuration file", "./config.json")
     .option("-l, --list", "List keys")
-    .option("-g, --generate", "Generate new keys")
-    .option("-o, --outfile <file>", "Output file, no suffix", "hodeaux")
-    .option("-a, --analyze", "Analyze key")
-    .option("-p, --passphrase <passphrase>", "Passphrase for key");
+    .option("-g, --generate", "Generate a new key")
+    .option("-a, --analyze", "Analyze a key")
+    .option("-f, --fix", "Fix a key")
+    .option("-v, --verbose");
 
 program.parse(process.argv);
 const options = program.opts();
-
-let config;
-if (fs.existsSync(options.config)) {
-    config = loadConfig(options.config);
-} else {
-    console.error("Config file not found: " + options.config);
-    process.exit(1);
-}
-
-if (options.help) {
-    program.help();
-    process.exit(0);
-}
+const args = program.args;
+console.log(args);
+const config = loadConfig(options.config, options);
+Disk.setPaths(config.secrets, config.ledger);
+const keyname = args[0];
 
 if (options.list) {
-    const keys = fs.readdirSync(config.secrets);
-    const privKeys = [];
-    const pubKeys = [];
-    const hotKeys = [];
-    for (const key of keys) {
-        if (key.endsWith(".enc.json")) {
-            privKeys.push(chalk.yellow(key));
-        } else {
-            if (key.endsWith(".pub")) {
-                pubKeys.push(key);
-            } else {
-                if (key.endsWith(".hot.json"))
-                    hotKeys.push(chalk.red.bold(key));
-            }
-        }
+    const keys = await Disk.listKeys();
+    console.log(keys);
+} else if (options.generate) {
+    const key = await Key.generate();
+    await Disk.saveKey(keyname, "hot", key);
+    console.log(key);
+} else if (options.analyze) {
+    const key = await Disk.loadKey(keyname, "enc");
+    console.log(key);
+    if (key.salt) {
+        const decrypted = await Key.decrypt(key, "password");
+        console.log(sodium.to_base64(decrypted));
     }
-    console.log(chalk.white.bold("Hot Keys:"));
-    console.log(hotKeys.join(", "));
-    console.log(chalk.white.bold("Private Keys:"));
-    console.log(privKeys.join(", "));
-    console.log(chalk.white.bold("Public Keys"));
-    console.log(pubKeys.join(", "));
-    process.exit(0);
+} else if (options.fix) {
+    const key = await Disk.loadKey(keyname, "hot");
+    const onceDecoded = Buffer.from(key.key, "base64").toString("utf8");
+    const recovered = Buffer.from(onceDecoded, "base64");
+    console.log("Recovered key length: ", recovered.length);
+
+    Disk.saveKey(keyname + "-fixed", "hot", {
+        key: sodium.to_base64(recovered),
+    });
+    const derivedPublic = sodium.crypto_sign_ed25519_sk_to_pk(recovered);
+    const pubkey = sodium.to_base64(derivedPublic);
+
+    console.log("Recovered public key:", pubkey);
+} else {
+    console.error("Invalid option");
+    process.exit(1);
 }
-
-if (options.generate) {
-    const { publicKey, privateKey } = await Key.generatePair();
-    if (options.passphrase) {
-        const encrypted = await Key.encryptPrivateKey(
-            privateKey,
-            options.passphrase
-        );
-        fs.writeFileSync(
-            config.secrets + "/" + options.outfile + ".enc.json",
-            JSON.stringify(encrypted)
-        );
-    } else {
-        fs.writeFileSync(
-            config.secrets + "/" + options.outfile + ".hot.json",
-            JSON.stringify({
-                key: privateKey,
-            })
-        );
-    }
-
-    fs.writeFileSync(
-        config.secrets + "/" + options.outfile + ".pub",
-        publicKey
-    );
-    console.log("Keys generated - ed25519:" + publicKey);
-    process.exit(0);
-}
-
-if (options.analyze) {
-    if (!options.passphrase) throw new Error("Passphrase is required");
-    const encrypted = JSON.parse(
-        fs.readFileSync(
-            config.secrets + "/" + options.outfile + ".ed25519.json"
-        )
-    );
-
-    encrypted.passphrase = options.passphrase;
-    const privateKey = await Key.decryptPrivateKey(encrypted);
-    console.log(
-        "Private key is " +
-            chalk.yellow.bold(privateKey.length) +
-            " bytes long."
-    );
-    if (privateKey.length === 64) {
-        console.log(chalk.green.bold("Good"));
-    } else {
-        console.log(chalk.red.bold("Bad"));
-    }
-    process.exit(0);
-}
-
-console.log(config);

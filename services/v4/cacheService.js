@@ -24,9 +24,11 @@ export const Cache = {
         return await db(recordTable).where({ previous_hash: hash }).first();
     },
 
-    async getScope(scope) {
+    async getScope(scope, recType = "") {
         const db = createDb();
-        return await db(recordTable).where({ scope });
+        return await db(recordTable)
+            .where({ scope })
+            .andWhere("recType", "like", `%${recType}%`);
     },
 
     async flushKeys() {

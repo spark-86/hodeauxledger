@@ -1,5 +1,5 @@
 import fs from "fs";
-import { loadConfig } from "../../tools/v3/config.js";
+import { loadConfig } from "../../tools/v4/config.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import { Record } from "./recordService.js";

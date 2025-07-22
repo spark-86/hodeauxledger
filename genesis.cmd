@@ -11,5 +11,4 @@ del /Q C:\ledger\*
 echo.
 echo === Starting Usher Genesis Bootstrap ===
 echo.
-set /p passphrase=Enter passphrase for genesis key:
-node usher -v -g --passphrase "%passphrase%"
+node usher -v -g

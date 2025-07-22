@@ -8,7 +8,7 @@
     "protocol": "v1",
     "scope": "some.random.scope.org",
     "nonce": "odlsiaopi...",
-    "at": 175893745,
+    "at": 1.23456789,
     "record_type": "key:grant",
     "data": {
         "schema": "key_grant_r1",

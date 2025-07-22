@@ -1,7 +1,8 @@
-import { fileURLtoPath } from "url";
+import { fileURLToPath } from "url";
 import fs from "fs";
 import path from "path";
-import { hex2base32 } from "../../tools/base32";
+import { hex2base32 } from "../../tools/base32.js";
+import { loadConfig } from "../../tools/v4/config.js";
 
 let secretsPath = "";
 let ledgerPath = "";
@@ -35,10 +36,12 @@ export const Disk = {
      * @returns {object} Varies based on key type
      */
     async loadKey(keyName, keyType) {
-        const file = keyType + "." + keyName + ".json";
-        const path = path.join(secretsPath, file);
-        if (!fs.existsSync(path)) throw new Error("Key not found");
-        return JSON.parse(fs.readFileSync(path));
+        const config = loadConfig();
+        const file = keyName + "." + keyType + ".json";
+        const workingPath = path.join(secretsPath, file);
+        console.log("Loading key from " + workingPath);
+        if (!fs.existsSync(workingPath)) throw new Error("Key not found");
+        return JSON.parse(fs.readFileSync(workingPath));
     },
 
     /**
@@ -48,9 +51,9 @@ export const Disk = {
      * @param {object} key - Object containg either { key: "102..."} or the stuff for an encrypted key
      */
     async saveKey(keyName, keyType, key) {
-        const file = keyType + "." + keyName + ".json";
-        const path = path.join(secretsPath, file);
-        fs.writeFileSync(path, JSON.stringify(key));
+        const file = keyName + "." + keyType + ".json";
+        const filePath = path.join(secretsPath, file);
+        fs.writeFileSync(filePath, JSON.stringify(key));
     },
 
     /**
@@ -60,13 +63,16 @@ export const Disk = {
      * @returns {object} Contents of the file JSON parsed
      */
     async loadRecord(scope, hash) {
-        const file =
-            hex2base32(
-                Buffer.from(hash, "base64").toString("hex")
-            ).toLowerCase() + ".json";
-        const path = path.join(ledgerPath, scope, file);
-        if (!fs.existsSync(path)) throw new Error("Record not found");
-        return JSON.parse(fs.readFileSync(path));
+        let file;
+        if (hash === "genesis") file = "genesis.json";
+        else
+            file =
+                hex2base32(
+                    Buffer.from(hash, "base64").toString("hex")
+                ).toLowerCase() + ".json";
+        const workingPath = path.join(ledgerPath, scope, file);
+        if (!fs.existsSync(workingPath)) throw new Error("Record not found");
+        return JSON.parse(fs.readFileSync(workingPath));
     },
 
     /**
@@ -75,15 +81,16 @@ export const Disk = {
      */
     async saveRecord(record) {
         const scope = record.scope;
-        const hash = record.hash;
-        const path = path.join(
-            ledgerPath,
-            scope,
-            hex2base32(
-                Buffer.from(hash, "base64").toString("hex")
-            ).toLowerCase() + ".json"
-        );
-        fs.writeFileSync(path, JSON.stringify(record));
+        let hash = "genesis";
+        if (record.previous_hash && record.previous_hash !== "genesis") {
+            hash = hex2base32(
+                Buffer.from(record.previous_hash, "base64").toString("hex")
+            ).toLowerCase();
+        }
+
+        const workingPath = path.join(ledgerPath, scope, hash + ".json");
+        fs.writeFileSync(workingPath, JSON.stringify(record));
+        this.updateTip(record.scope, record.current_hash);
     },
 
     /**
@@ -101,20 +108,21 @@ export const Disk = {
         if (!fs.existsSync(file))
             throw new Error("File doesn't exist: " + file);
         const genesis = JSON.parse(fs.readFileSync(file));
-        let hash = genesis.current_hash;
+        scopeData.push(genesis);
+        let workingHash = genesis.current_hash;
         while (true) {
             const targetFile = path.join(
                 ledgerPath,
                 scope,
                 hex2base32(
-                    Buffer.from(hash, "base64").toString("hex")
+                    Buffer.from(workingHash, "base64").toString("hex")
                 ).toLowerCase() + ".json"
             );
             if (!fs.existsSync(targetFile)) {
                 return scopeData;
             }
             const currentRhex = JSON.parse(fs.readFileSync(targetFile));
-            hash = currentRhex.current_hash;
+            workingHash = currentRhex.current_hash;
             scopeData.push(currentRhex);
         }
     },
@@ -132,8 +140,8 @@ export const Disk = {
      * @param {string} ledger - Ledger path
      */
     setPaths(secrets, ledger) {
-        secretsPath = fileURLtoPath(secrets);
-        ledgerPath = fileURLtoPath(ledger);
+        secretsPath = fileURLToPath(secrets);
+        ledgerPath = fileURLToPath(ledger);
     },
 
     /**
@@ -145,5 +153,16 @@ export const Disk = {
             secrets: secretsPath,
             ledger: ledgerPath,
         };
+    },
+
+    async getTip(scope = "") {
+        const workingPath = path.join(ledgerPath, scope, "lasthash.txt");
+        if (!fs.existsSync(workingPath)) return "";
+        else return fs.readFileSync(workingPath, "utf8");
+    },
+
+    async updateTip(scope, hash) {
+        const workingPath = path.join(ledgerPath, scope, "lasthash.txt");
+        fs.writeFileSync(workingPath, hash);
     },
 };

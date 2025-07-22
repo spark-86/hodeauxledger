@@ -1,7 +1,7 @@
 {
     "httpPort": 1978,
-    "secrets": "/secrets",
-    "ledger": "/ledger",
+    "secrets": "file://c:/secrets",
+    "ledger": "file://c:/ledger",
     "logfile": "./logs/hodeaux.log",
     "cacheFile": "./cache.db"
 }

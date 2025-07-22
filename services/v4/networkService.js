@@ -43,4 +43,27 @@ export const Network = {
             publicKeyBytes
         );
     },
+
+    async sendMessage(host, port, message) {},
+
+    async receiveMessage(message) {
+        await sodium.ready;
+
+        // Pre-set the error message
+        const returnMessage = {
+            type: "error",
+            scope: "",
+            payload: {
+                message: "Undefined error",
+            },
+        };
+        if (message.type === "request") {
+            if (await this.verifyMessage(message)) {
+                returnMessage.type = "response";
+                returnMessage.payload.message = "Message verified";
+            } else {
+                returnMessage.payload.message = "Message could not be verified";
+            }
+        }
+    },
 };

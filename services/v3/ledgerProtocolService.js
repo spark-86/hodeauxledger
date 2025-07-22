@@ -1,5 +1,5 @@
 import { createDb } from "../../tools/db.js";
-import { loadConfig } from "../../tools/v3/config.js";
+import { loadConfig } from "../../tools/v4/config.js";
 import { Disk } from "./diskService.js";
 import { Record } from "./recordService.js";
 

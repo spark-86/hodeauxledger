@@ -1,60 +1,56 @@
-import canonicalize from "canonicalize";
-import crypto from "crypto";
-import { Record } from "../../services/v1/recordService.js";
-import { Keyring } from "../../services/v1/keyringService.js";
-import { keyFormat } from "../../tools/keyCleaner.js";
+import { Disk } from "../../services/v4/diskService.js";
+import { Key } from "../../services/v4/keyService.js";
+import { Ledger } from "../../services/v4/ledgerService.js";
+import { Usher } from "../../services/v4/usherService.js";
 
 export const postAppend = async (req, res) => {
-    const {
-        protocol,
-        scope,
-        data,
-        signature,
-        key,
-        record_type,
-        previous_hash,
-    } = req.body;
+    console.dir(req.body, { depth: null });
+    const { protocol, scope, nonce, record_type, data, signatures } = req.body;
 
-    const recordToVerify = {
-        previous_hash,
+    const submittedRecord = {
         protocol,
         scope,
-        key,
+        nonce,
         record_type,
         data,
+        signatures,
     };
-
-    // lookup key
-    const found = await Keyring.ringLookup(key);
-    if (!found) {
-        return res.status(404).json({ error: "Key not found" });
-    }
-
-    // verify record
-    const canonical = canonicalize(recordToVerify);
-    const signatureBuf = Buffer.from(signature, "base64");
-
-    const verify = crypto.createVerify("sha256");
-    verify.update(canonical);
-    verify.end();
-
-    const verified = verify.verify(keyFormat(found.key), signatureBuf);
+    const verified = await Key.verify(submittedRecord, "owner");
     if (!verified) {
-        return res.status(401).json({ error: "Signature verification failed" });
+        console.log("Attempted to submit unverifiable R⬢");
+        console.dir(submittedRecord, { depth: null });
+        return res.status(400).json({ message: "R⬢ did not validate" });
     }
 
-    // create record
-    const recordToCreate = {
-        previous_hash,
-        protocol,
-        scope,
-        key,
-        record_type,
-        data,
-        signature,
-    };
+    // See what is required to read from the scope
 
-    const recordId = await Record.create(recordToCreate);
+    // Send out for quorum
 
-    return res.status(200).json({ data: recordId });
+    // Process if necessary
+
+    // Write to ledger
+    const tip = await Disk.getTip(submittedRecord.scope);
+    const usherHotKey = await Disk.loadKey("usher", "hot");
+    if (!usherHotKey) {
+        console.log("Could not load usher hot key");
+        return res.status(500).json({ message: "Could not sign message" });
+    }
+    console.log(tip);
+    const usherSigned = await Usher.sign(submittedRecord, tip, usherHotKey.key);
+    console.dir(usherSigned, { depth: null });
+    await Ledger.append(usherSigned);
+    return res.status(201).json({ data: usherSigned });
+    try {
+    } catch (err) {
+        console.error(`Error: ${err}`);
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+const processRecord = async (record) => {
+    const parts = record.record_type.split(":");
+
+    switch (parts[0]) {
+        case "scope":
+    }
 };

@@ -1,7 +1,7 @@
 import { Key } from "./keyService.js";
 import fs from "fs";
 import path from "path";
-import { loadConfig } from "../../tools/v3/config.js";
+import { loadConfig } from "../../tools/v4/config.js";
 import sodium from "libsodium-wrappers-sumo";
 import { Record } from "./recordService.js";
 import { Ledger } from "./ledgerService.js";

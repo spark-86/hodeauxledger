@@ -12,7 +12,7 @@ It’s not a blockchain.
 It’s not a cryptocurrency.
 **It’s a protocol for memory.**
 
-Please read a little on the theory behind all this in our doc on [Temporal Cryptophysics](docs/temporal_cryptophyiscs.md).
+Please read a little on the theory behind all this in our docs on [Temporal Cryptophysics](https://github.com/veronicahodo/temporal-cryptophysics/).
 
 ## 🧬 Why it exists
 
@@ -83,7 +83,7 @@ It’s about locally enforceable, globally legible truth.
 
 We do not build in silence.
 All records are public unless intentionally scoped otherwise.
-**We operate under the [HodoTrust](docs/hodo_trust.md)**—an ethical commitment to transparency, autonomy, and care.
+**We operate under the [HodoTrust](https://github.com/veronicahodo/temporal-cryptophysics/blob/main/hodo-trust.md)**—an ethical commitment to transparency, autonomy, and care.
 
 ## 🚧 Project Status
 
@@ -100,6 +100,8 @@ But it works.
 And it’s clean enough to trust already.
 
 ## 📍 Start Here
+
+[Temporal Cryptophysics](https://github.com/veronicahodo/temporal-cryptophysics/)
 
 [GitHub Repo](https://github.com/spark-86/hodeauxledger)
 
@@ -123,5 +125,3 @@ Just don’t let truth rot in silence.
 
 Respectfully,
 Veronica Hodo
-<https://self.trust.archi/0000-0000-0000-0000>
-[R⬢://id.self.0000-0000-0000-0000](rhex://id.self.0000-0000-0000-0000)

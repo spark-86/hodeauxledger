@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { loadConfig } from "../../tools/v3/config.js";
+import { loadConfig } from "../../tools/v4/config.js";
 import fs from "fs";
 import path from "path";
 import { GrpcProtocol } from "./grpcProtocolService.js";
