@@ -18,6 +18,7 @@ program
     .option("-g, --generate", "Generate a new key")
     .option("-a, --analyze", "Analyze a key")
     .option("-f, --fix", "Fix a key")
+    .option("-p, --pubkey", "Get a pub key from a privaet")
     .option("-v, --verbose");
 
 program.parse(process.argv);
@@ -41,13 +42,18 @@ if (options.list) {
     if (key.salt) {
         const decrypted = await Key.decrypt(key, "password");
         console.log(sodium.to_base64(decrypted));
+        if (options.pubkey) {
+            const derivedPublic =
+                sodium.crypto_sign_ed25519_sk_to_pk(decrypted);
+            const pubkey = sodium.to_base64(derivedPublic);
+            console.log("Derived public key:", pubkey);
+        }
     }
 } else if (options.fix) {
     const key = await Disk.loadKey(keyname, "hot");
     const onceDecoded = Buffer.from(key.key, "base64").toString("utf8");
     const recovered = Buffer.from(onceDecoded, "base64");
     console.log("Recovered key length: ", recovered.length);
-
     Disk.saveKey(keyname + "-fixed", "hot", {
         key: sodium.to_base64(recovered),
     });
@@ -55,6 +61,17 @@ if (options.list) {
     const pubkey = sodium.to_base64(derivedPublic);
 
     console.log("Recovered public key:", pubkey);
+} else if (!options.analyze && !options.fix && options.pubkey) {
+    const key = await Disk.loadKey(keyname, "hot");
+    if (!key) {
+        console.error("Key not found");
+        process.exit(1);
+    }
+    const derivedPublic = sodium.crypto_sign_ed25519_sk_to_pk(
+        Buffer.from(key.key, "base64")
+    );
+    const pubkey = sodium.to_base64(derivedPublic);
+    console.log("Derived public key:", pubkey);
 } else {
     console.error("Invalid option");
     process.exit(1);

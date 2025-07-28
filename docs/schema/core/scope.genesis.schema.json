@@ -1,28 +1,61 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema#",
     "$id": "https://github.com/spark-86/hodeauxledger/blob/master/docs/schema/core/scope.genesis.schema.json",
-    "title": "Core Scope Genesis",
+    "title": "Scope Genesis Schema",
     "type": "object",
     "required": [
-        "authories",
-        "policy"
+        "scope",
+        "usher"
     ],
     "properties": {
-        "name": {
-            "type": "string"
+        "scope": {
+            "type": "string",
+            "description": "The full scope name being created (e.g. 0000-xxxx-yyyy-zzzz.veroself)"
         },
-        "authories": {
+        "usher": {
             "type": "array",
+            "description": "The usher(s) responsible for this scope",
             "items": {
-                "type": "string"
+                "type": "object",
+                "required": [
+                    "host",
+                    "port",
+                    "key"
+                ],
+                "properties": {
+                    "host": {
+                        "type": "string",
+                        "description": "Can be an IP, hostname, or onion address"
+                    },
+                    "port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    "key": {
+                        "type": "string",
+                        "description": "Ed25519 public key of the usher"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Optional human-readable identifier for this usher"
+                    }
+                },
+                "additionalProperties": false
             }
         },
-        "policy": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+        "note": {
+            "type": "string",
+            "description": "Optional human-readable message about this scope creation"
         },
-        "additionalProperties": false
-    }
+        "created_by": {
+            "type": "string",
+            "description": "Optional fingerprint of the user or entity creating the scope"
+        },
+        "refers_to": {
+            "type": "string",
+            "description": "Optional hash of the self:request or scope:create record that this genesis is based on"
+        }
+    },
+    "additionalProperties": false
 }

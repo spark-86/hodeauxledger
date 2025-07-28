@@ -7,6 +7,7 @@ import { Disk } from "./services/v4/diskService.js";
 import { Cache } from "./services/v4/cacheService.js";
 import chalk from "chalk";
 import { Time } from "./services/v4/timeService.js";
+import { Handler } from "./handlers/v1/handler.js";
 
 const program = new Command();
 
@@ -29,6 +30,8 @@ console.log(options);
 const config = loadConfig(options.config, options);
 Disk.setPaths(config.secrets, config.ledger);
 
+await Cache.flushAll();
+
 console.log(chalk.magentaBright("Loading root scope from disk..."));
 const rootScope = await Disk.loadScope("");
 for (const node of rootScope) {
@@ -37,7 +40,17 @@ for (const node of rootScope) {
             `Loaded node: ${node.record_type} with hash: ${node.current_hash}`
         )
     );
+    const handled = await Handler.process(node, true);
 }
+/*const selfScope = await Disk.loadScope("self");
+for (const node of selfScope) {
+    console.log(
+        chalk.blackBright(
+            `Loaded self node: ${node.record_type} with hash: ${node.current_hash}`
+        )
+    );
+    await Cache.addRecord(node);
+}*/
 
 // set Genesis Epoch
 if (rootScope[0].data.js_at) {

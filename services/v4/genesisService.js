@@ -105,18 +105,19 @@ const signGenesisRecords = async (keys) => {
         record_type: "policy:set",
         data: {
             schema: "policy.set/1",
-            write: ["core", "root"],
-            read: ["any"],
+            keymaster_roles: ["core", "root"],
+            append_roles: ["core", "root"],
+            read_roles: ["any"],
             mirror: ["any"],
-            grant: ["core", "root"],
-            revoke: ["core", "root"],
-            allow_records: ["scope:*", "core:*"],
-            deny_records: ["all"],
-            quorum: {
-                write: 1,
-                grant: 1,
-                revoke: 2,
+            quorum_map: {
+                all: 1,
             },
+            allow_rhex: ["scope:*", "core:*", "key:*","request:*"],
+            deny_rhex: ["all"],
+            request_logging: "none",
+            description: "Root Scope Policy Set",
+            tags: ["core", "root"],
+            created_by: "Y_dGA-DOtN1kqpZQx1WytR-qmYbcdkWla5cIaK8WDU4"
         },
         signatures: [],
     };

@@ -1,0 +1,4 @@
+{
+    "schema": "core.note/1",
+    "message": "Well this is definely not how I planned this to go.\n\nAllow me to introduce what is considered a temporal scar if you will. I fucked up and issued a key that was invalid. Then I signed records with that invalid key. And attached them to the ledger.\n\nThe decision was to roll back to the genesis R⬢ and fork. The old data is preserved on https://trust.archi/oops \n\nProof even the Goddess of Time is fallible. ;)\n\nLove, Veronica"
+}

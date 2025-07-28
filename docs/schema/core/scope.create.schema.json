@@ -1,0 +1,54 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/spark-86/hodeauxledger/blob/master/docs/schema/core/scope.create.schema.json",
+    "title": "Scope Create Schema",
+    "type": "object",
+    "required": [
+        "schema",
+        "new_scope",
+        "ushers"
+    ],
+    "properties": {
+        "schema": {
+            "const": "scope.create/1"
+        },
+        "new_scope": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
+        "ushers": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "ip",
+                    "port",
+                    "key"
+                ],
+                "properties": {
+                    "host": {
+                        "type": "string"
+                    },
+                    "port": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 65535
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "request_hash": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+}
