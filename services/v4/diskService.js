@@ -107,7 +107,12 @@ export const Disk = {
         );
         if (!fs.existsSync(file))
             throw new Error("File doesn't exist: " + file);
-        const genesis = JSON.parse(fs.readFileSync(file));
+        let genesis;
+        try {
+            genesis = JSON.parse(fs.readFileSync(file));
+        } catch (err) {
+            console.log(err.message);
+        }
         scopeData.push(genesis);
         let workingHash = genesis.current_hash;
         while (true) {
