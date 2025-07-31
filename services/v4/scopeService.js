@@ -48,6 +48,7 @@ export const Scope = {
         if (!cachedKey) return false;
         let success = false;
         for (const readRole of policy.roles_map.read_roles) {
+            console.log(cachedKey);
             if (cachedKey.roles.includes(readRole)) {
                 success = true;
                 break;
