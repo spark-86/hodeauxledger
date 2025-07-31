@@ -87,6 +87,25 @@ export const HandlerScope = {
         if (boot) {
             for (const authority of record.data.authorities) {
                 await Cache.addKey(record.scope, authority.key, ["authority"]);
+                await Cache.addPolicy(record.scope, {
+                    roles_map: {
+                        append_roles: ["authority"],
+                        read_roles: ["authority"],
+                        quorum_roles: ["authority"],
+                        keymaster_roles: ["authority"],
+                    },
+                    quorum_map: {
+                        all: 1,
+                    },
+                    config_json: {
+                        allow_rhex: ["all"],
+                        deny_rhex: ["none"],
+                        request_logging: "none",
+                        description: "Generic Scope Policy Set",
+                        tags: ["authority"],
+                    },
+                });
+                await Cache.addRecord(record);
             }
         } else {
             // This should never occur. Scope:genesis records get introduced
