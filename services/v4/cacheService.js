@@ -74,8 +74,11 @@ export const Cache = {
         const db = createDb();
         const result = await db(policyTable).where({ scope }).first();
         if (!result) return false;
-        const configJson = JSON.parse(result.config_json);
-        return configJson;
+        return {
+            roles_map: JSON.parse(result.roles_map),
+            quorum_map: JSON.parse(result.quorum_map),
+            config_json: JSON.parse(result.config_json),
+        };
     },
 
     async flushKeys() {
