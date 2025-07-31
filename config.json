@@ -1,8 +1,8 @@
 {
     "httpPort": 1978,
     "httpsPort": 1984,
-    "secrets": "file://c:/secrets",
-    "ledger": "file://c:/ledger",
+    "secrets": "file:///secrets",
+    "ledger": "file:///ledger",
     "logfile": "./logs/hodeaux.log",
     "cacheFile": "./cache.db",
     "certFile": "/etc/letsencrypt/live/core.hodeauxledger.org/fullchain.pem",
