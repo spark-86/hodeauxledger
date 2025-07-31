@@ -98,6 +98,10 @@ export const HandlerScope = {
                         all: 1,
                     },
                     config_json: {
+                        append_roles: ["authority"],
+                        read_roles: ["authority"],
+                        quorum_roles: ["authority"],
+                        keymaster_roles: ["authority"],
                         allow_rhex: ["all"],
                         deny_rhex: ["none"],
                         request_logging: "none",
