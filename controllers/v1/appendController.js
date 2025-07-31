@@ -60,10 +60,6 @@ export const postAppend = async (req, res) => {
 
     // Send out for quorum
 
-    // Process if necessary
-    if (submittedRecord.record_type !== "request")
-        await Handler.process(usherSigned);
-
     // Write to ledger, if we are supposed to
     if (submittedRecord.record_type !== "request") {
         if (config.verbose) console.log("Writing to ledger");
@@ -84,6 +80,7 @@ export const postAppend = async (req, res) => {
                 "Appended R⬢ with hash: " + usherSigned.current_hash
             )
         );
+        await Handler.process(usherSigned);
         await Ledger.append(usherSigned);
         return res.status(201).json({ data: usherSigned });
     } else {
