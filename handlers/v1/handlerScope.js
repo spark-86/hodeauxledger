@@ -7,6 +7,7 @@ import path from "path";
 import { loadConfig } from "../../tools/v4/config.js";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { Handler } from "./handler.js";
 
 export const HandlerScope = {
     async process(record, boot = false) {
@@ -25,7 +26,7 @@ export const HandlerScope = {
     async create(record, boot) {
         const config = loadConfig();
         if (boot) {
-            const scopeData = await Disk.loadScope(record.data.scope);
+            const scopeData = await Disk.loadScope(record.data.new_scope);
             if (scopeData) {
                 for (const node of scopeData) {
                     await Cache.addRecord(node);
@@ -34,6 +35,7 @@ export const HandlerScope = {
                             `Loaded ${node.scope} node: ${node.record_type} with hash: ${node.current_hash}`
                         )
                     );
+                    const handled = await Handler.process(node, true);
                 }
             }
             await Cache.addRecord(record);
