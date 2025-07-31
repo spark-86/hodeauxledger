@@ -5,6 +5,7 @@ import { Key } from "../../services/v4/keyService.js";
 import { Usher } from "../../services/v4/usherService.js";
 import path from "path";
 import { loadConfig } from "../../tools/v4/config.js";
+import { fileURLToPath } from "url";
 
 export const HandlerScope = {
     async process(record, boot = false) {
@@ -58,7 +59,10 @@ export const HandlerScope = {
             );
 
             // Create new scope here
-            const scopePath = path.join(config.ledger, record.data.scope);
+            const dirname = fileURLToPath(
+                new URL(config.ledger, import.meta.url)
+            );
+            const scopePath = path.join(dirname, record.data.scope);
             if (fs.existsSync(scopePath)) {
                 throw new Error("Scope already exists");
             }
