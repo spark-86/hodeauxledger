@@ -1,0 +1,36 @@
+{
+    "schema": "scope.create/1",
+    "new_scope": "petri",
+    "authorities": [
+        {
+            "name": "Core Authority",
+            "host": "core.hodeauxledger.com",
+            "port": 1984,
+            "key": "Bn3bHf5FxeTo2DPJtrmT_SXAKL03CFt-eZgSDwLSYTs"
+        }
+    ],
+    "genesis": {
+        "protocol": "v1",
+        "scope": "petri",
+        "nonce": "vMFx3S-KG17zk4PCAjGrTIfR8NorLx207HOllNRtvt0",
+        "record_type": "scope:genesis",
+        "data": {
+            "schema": "scope.genesis/1",
+            "authorities": [
+                {
+                    "name": "Core Authority",
+                    "host": "core.hodeauxledger.com",
+                    "port": 1984,
+                    "key": "Bn3bHf5FxeTo2DPJtrmT_SXAKL03CFt-eZgSDwLSYTs"
+                }
+            ]
+        },
+        "signatures": [
+            {
+                "fingerprint": "Y_dGA-DOtN1kqpZQx1WytR-qmYbcdkWla5cIaK8WDU4",
+                "type": "owner",
+                "signature": "AklZJzgJutQAz5QriTetXXsx8sRwtMVdssI3ear2tRqskvxQIzKcXiC1us217SqizCwNDqxkq7xZv_B1NUDYAQ"
+            }
+        ]
+    }
+}
