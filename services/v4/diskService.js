@@ -99,6 +99,7 @@ export const Disk = {
      * @returns
      */
     async loadScope(scope, hash = "genesis") {
+        const config = loadConfig();
         const scopeData = [];
         const file = path.join(
             ledgerPath,
@@ -111,7 +112,7 @@ export const Disk = {
         try {
             genesis = JSON.parse(fs.readFileSync(file));
         } catch (err) {
-            console.log(err.message);
+            console.error(err.message);
         }
         scopeData.push(genesis);
         let workingHash = genesis.current_hash;
@@ -126,7 +127,13 @@ export const Disk = {
             if (!fs.existsSync(targetFile)) {
                 return scopeData;
             }
-            const currentRhex = JSON.parse(fs.readFileSync(targetFile));
+            let currentRhex;
+            if (config.verbose) console.log("Loading file: " + targetFile);
+            try {
+                currentRhex = JSON.parse(fs.readFileSync(targetFile));
+            } catch (err) {
+                console.error(err.message);
+            }
             workingHash = currentRhex.current_hash;
             scopeData.push(currentRhex);
         }
