@@ -62,7 +62,7 @@ export const HandlerScope = {
             const dirname = fileURLToPath(
                 new URL(config.ledger, import.meta.url)
             );
-            const scopePath = path.join(dirname, record.data.scope);
+            const scopePath = path.join(dirname, record.data.new_scope);
             if (fs.existsSync(scopePath)) {
                 throw new Error("Scope already exists");
             }
