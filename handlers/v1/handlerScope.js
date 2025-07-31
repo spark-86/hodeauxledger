@@ -71,7 +71,7 @@ export const HandlerScope = {
             await Disk.saveRecord(usherSigned);
             await Disk.updateTip(
                 record.data.new_scope,
-                genesisRecord.current_hash
+                usherSigned.current_hash
             );
             await Cache.addRecord(record);
             await Cache.addRecord(usherSigned);
