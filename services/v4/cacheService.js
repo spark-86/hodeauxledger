@@ -18,9 +18,16 @@ export const Cache = {
 
     async getKey(scope, fingerprint) {
         const db = createDb();
-        return await db(keyringTable)
+        const key = await db(keyringTable)
             .where({ scope, key: fingerprint })
             .first();
+        if (!key) return false;
+        return {
+            scope: key.scope,
+            key: key.key,
+            roles: key.roles.split(","),
+            exp: key.exp,
+        };
     },
 
     async addRecord(record) {
