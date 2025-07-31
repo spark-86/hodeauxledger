@@ -8,6 +8,8 @@ import { Cache } from "./services/v4/cacheService.js";
 import chalk from "chalk";
 import { Time } from "./services/v4/timeService.js";
 import { Handler } from "./handlers/v1/handler.js";
+import http from "http";
+import https from "https";
 
 const program = new Command();
 
@@ -20,6 +22,7 @@ program
         "Set config file (default: ./config.json)",
         "./config.json"
     )
+    .option("-s, --ssl", "Run with SSL")
     .option("--core", "Run as the core")
     .option("-v, --verbose", "Verbose logging");
 
@@ -42,15 +45,6 @@ for (const node of rootScope) {
     );
     const handled = await Handler.process(node, true);
 }
-/*const selfScope = await Disk.loadScope("self");
-for (const node of selfScope) {
-    console.log(
-        chalk.blackBright(
-            `Loaded self node: ${node.record_type} with hash: ${node.current_hash}`
-        )
-    );
-    await Cache.addRecord(node);
-}*/
 
 // set Genesis Epoch
 if (rootScope[0].data.js_at) {
@@ -72,6 +66,22 @@ app.use(cors());
 
 app.post("/append", postAppend);
 
-app.listen(config.httpPort, () => {
-    console.log("Usher Express listening on port " + config.httpPort);
-});
+const httpServer = http.createServer(app);
+httpServer.listen(config.httpPort);
+
+if (options.ssl) {
+    const httpsServer = https.createServer(
+        {
+            key: config.keyFile,
+            cert: config.certFile,
+        },
+        app
+    );
+    httpsServer.listen(config.httpsPort);
+}
+
+console.log(chalk.green("Usher is running on port " + config.httpPort));
+if (options.ssl)
+    console.log(
+        chalk.green("Usher w/ SSL is running on port " + config.httpsPort)
+    );
