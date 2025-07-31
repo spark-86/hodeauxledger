@@ -34,7 +34,7 @@ export const HandlerScope = {
             if (!genesisRecord) {
                 throw new Error("Missing genesis record");
             }
-            if (genesisRecord.record_type !== "genesis") {
+            if (genesisRecord.record_type !== "scope:genesis") {
                 throw new Error("Invalid genesis record");
             }
             const verified = await Key.verify(genesisRecord, "owner");
