@@ -4,6 +4,7 @@ import { Disk } from "../../services/v4/diskService.js";
 import { Key } from "../../services/v4/keyService.js";
 import { Usher } from "../../services/v4/usherService.js";
 import path from "path";
+import { loadConfig } from "../../tools/v4/config.js";
 
 export const HandlerScope = {
     async process(record, boot = false) {
@@ -17,6 +18,7 @@ export const HandlerScope = {
         }
     },
     async create(record, boot) {
+        const config = loadConfig();
         if (boot) {
             const scopeData = await Disk.loadScope(record.data.scope);
             if (scopeData) {
