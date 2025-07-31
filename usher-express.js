@@ -72,6 +72,6 @@ app.use(cors());
 
 app.post("/append", postAppend);
 
-app.listen(1978, () => {
-    console.log("Usher Express listening on port 1978");
+app.listen(config.port, () => {
+    console.log("Usher Express listening on port " + config.port);
 });
