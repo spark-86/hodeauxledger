@@ -109,7 +109,6 @@ export const HandlerScope = {
                         tags: ["authority"],
                     },
                 });
-                await Cache.addRecord(record);
             }
         } else {
             // This should never occur. Scope:genesis records get introduced
