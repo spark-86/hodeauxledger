@@ -44,6 +44,7 @@ export const Scope = {
         if (!policy.read_roles) return false;
         if (policy.read_roles.includes("any")) return true;
         const cachedKey = await Cache.getKey(scope, key);
+        if (config.verbose) console.log("Cached key:", cachedKey);
         if (!cachedKey) return false;
         let success = false;
         for (const readRole of policy.roles_map.read_roles) {
