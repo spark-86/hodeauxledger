@@ -14,6 +14,9 @@ export const HandlerScope = {
             case "scope:create":
                 await this.create(record, boot);
                 break;
+            case "scope:genesis":
+                await this.genesis(record, boot);
+                break;
             case "scope:seal":
                 await this.seal(record, boot);
                 break;
@@ -75,6 +78,17 @@ export const HandlerScope = {
             );
             await Cache.addRecord(record);
             await Cache.addRecord(usherSigned);
+        }
+    },
+
+    async genesis(record, boot) {
+        if (boot) {
+            for (const authority of record.data.authorities) {
+                await Cache.addKey(record.scope, authority.key, ["authority"]);
+            }
+        } else {
+            // This should never occur. Scope:genesis records get introduced
+            // through the requesting scope:create
         }
     },
 
