@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { Cache } from "../../services/v4/cacheService.js";
 import { Disk } from "../../services/v4/diskService.js";
 import { Key } from "../../services/v4/keyService.js";
+import { Usher } from "../../services/v4/usherService.js";
 
 export const HandlerScope = {
     async process(record, boot = false) {
