@@ -39,6 +39,7 @@ export const Scope = {
         const config = loadConfig();
         if (config.verbose) console.log(`Scope (${scope}) key: ${key}`);
         const policy = await this.getPolicy(scope);
+        if (config.verbose) console.log("Policy:", policy);
         if (!policy) return false;
         if (!policy.read_roles) return false;
         if (policy.read_roles.includes("any")) return true;
