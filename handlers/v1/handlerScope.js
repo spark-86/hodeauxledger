@@ -30,7 +30,7 @@ export const HandlerScope = {
             await Cache.addRecord(record);
         } else {
             // Validate Genesis payload
-            const genesisRecord = record.data.genesis_record;
+            const genesisRecord = record.data.genesis;
             if (!genesisRecord) {
                 throw new Error("Missing genesis record");
             }
