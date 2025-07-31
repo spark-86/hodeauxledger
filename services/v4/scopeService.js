@@ -36,6 +36,8 @@ export const Scope = {
     },
 
     async canRead(key, scope) {
+        const config = loadConfig();
+        if (config.verbose) console.log(`Scope (${scope}) key: ${key}`);
         const policy = await this.getPolicy(scope);
         if (!policy) return false;
         if (!policy.read_roles) return false;
