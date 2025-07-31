@@ -69,7 +69,10 @@ export const HandlerScope = {
             }
             fs.mkdirSync(scopePath);
             await Disk.saveRecord(usherSigned);
-            await Disk.updateTip(record.data.scope, genesisRecord.current_hash);
+            await Disk.updateTip(
+                record.data.new_scope,
+                genesisRecord.current_hash
+            );
             await Cache.addRecord(record);
             await Cache.addRecord(usherSigned);
         }
