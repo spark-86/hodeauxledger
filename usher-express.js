@@ -10,6 +10,7 @@ import { Time } from "./services/v4/timeService.js";
 import { Handler } from "./handlers/v1/handler.js";
 import http from "http";
 import https from "https";
+import fs from "fs";
 
 const program = new Command();
 
@@ -70,10 +71,15 @@ const httpServer = http.createServer(app);
 httpServer.listen(config.httpPort);
 
 if (options.ssl) {
+    console.log(chalk.magentaBright("Starting HTTPS server..."));
+    if (!config.keyFile || !config.certFile)
+        throw new Error(
+            "SSL key and certificate files must be specified in the config."
+        );
     const httpsServer = https.createServer(
         {
-            key: config.keyFile,
-            cert: config.certFile,
+            key: fs.readFileSync(config.keyFile),
+            cert: fs.readFileSync(config.certFile),
         },
         app
     );
