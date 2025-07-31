@@ -6,6 +6,7 @@ import { Usher } from "../../services/v4/usherService.js";
 import path from "path";
 import { loadConfig } from "../../tools/v4/config.js";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 export const HandlerScope = {
     async process(record, boot = false) {
