@@ -109,6 +109,7 @@ export const HandlerScope = {
                     },
                 });
             }
+            await Cache.addRecord(record);
         } else {
             // This should never occur. Scope:genesis records get introduced
             // through the requesting scope:create
