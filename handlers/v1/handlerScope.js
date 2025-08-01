@@ -29,7 +29,6 @@ export const HandlerScope = {
             const scopeData = await Disk.loadScope(record.data.new_scope);
             if (scopeData) {
                 for (const node of scopeData) {
-                    await Cache.addRecord(node);
                     console.log(
                         chalk.blackBright(
                             `Loaded ${node.scope} node: ${node.record_type} with hash: ${node.current_hash}`
