@@ -1,1 +1,27 @@
-{}
+{
+    "schema": "policy.set/1",
+    "keymaster_roles": [
+        "authority"
+    ],
+    "read_roles": [
+        "any"
+    ],
+    "append_roles": [
+        "authority"
+    ],
+    "quorum_roles": [
+        "authority"
+    ],
+    "quorum_map": {
+        "all": 1
+    },
+    "allow_rhex": [
+        "*"
+    ],
+    "deny_rhex": [
+        "none"
+    ],
+    "request_logging": "none",
+    "description": "Petri Scope Policy Set",
+    "created_by": "Bn3bHf5FxeTo2DPJtrmT_SXAKL03CFt-eZgSDwLSYTs"
+}
