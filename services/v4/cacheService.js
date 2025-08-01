@@ -48,7 +48,9 @@ export const Cache = {
         }
         */
         const db = createDb();
-        await db(policyTable).where({ scope }).delete();
+        await db(policyTable)
+            .where({ scope: scope ?? "" })
+            .delete();
         await db(policyTable).insert({
             scope: scope ?? "",
             roles_map: JSON.stringify(formattedPolicy.roles_map),
