@@ -9,12 +9,12 @@ export const Scope = {
     async canAppend(key, scope, recordType) {
         const policy = await this.getPolicy(scope);
         if (!policy) return false;
-        if (!policy.append_roles) return false;
-        if (policy.append_roles.includes("any")) return true;
+        if (!policy.roles_map.append_roles) return false;
+        if (policy.roles_map.append_roles.includes("any")) return true;
         const cachedKey = await Cache.getKey(scope, key);
         if (!cachedKey) return false;
         let success = false;
-        for (const appendRole of policy.append_roles) {
+        for (const appendRole of policy.roles_map.append_roles) {
             if (cachedKey.roles.includes(appendRole)) {
                 success = true;
                 break;
