@@ -5,7 +5,7 @@ export const HandlerPolicy = {
     async process(record) {
         switch (record.record_type) {
             case "policy:set":
-                await Scope.setPolicy(record.data.scope, record.data);
+                await Scope.setPolicy(record.scope, record.data);
                 return await Cache.addRecord(record);
             default:
         }
