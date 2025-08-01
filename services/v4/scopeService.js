@@ -20,13 +20,13 @@ export const Scope = {
                 break;
             }
         }
-        for (const allowedRhex of policy.allow_rhex) {
+        for (const allowedRhex of policy.config_json.allow_rhex) {
             if (Match.rhex(recordType, allowedRhex)) {
                 success = true;
                 break;
             }
         }
-        for (const deniedRhex of policy.deny_rhex) {
+        for (const deniedRhex of policy.config_json.deny_rhex) {
             if (Match.rhex(recordType, deniedRhex)) {
                 success = false;
                 break;
