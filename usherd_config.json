@@ -1,0 +1,8 @@
+{
+    "host": "localhost",
+    "port": 1984,
+    "db.type": "store",
+    "db.name": "/var/ledger/cache.db",
+    "ledger_path": "/var/ledger/store",
+    "hot_key_path": "/var/ledger/keys/usher.hot.key"
+}

@@ -1,0 +1,22 @@
+[package]
+name = "hl-io"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+argon2.workspace = true
+aes-gcm.workspace = true
+ed25519-dalek.workspace = true
+getrandom.workspace = true
+zeroize.workspace = true
+rusqlite.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+bytes.workspace = true
+futures.workspace = true
+
+
+hl-core = { path = "../hl-core" }
+
+

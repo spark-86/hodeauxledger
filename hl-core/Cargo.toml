@@ -1,0 +1,18 @@
+[package]
+name = "hl-core"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_bytes.workspace = true
+serde_json.workspace = true
+serde_with.workspace = true
+ciborium.workspace = true
+ed25519-dalek.workspace = true
+blake3.workspace = true
+getrandom.workspace = true
+base64.workspace = true
+
+
