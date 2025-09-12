@@ -8,10 +8,21 @@ impl Key {
         Self { sk: None, pk: None }
     }
 
-    pub fn from_bytes(sk: [u8; 32], pk: [u8; 32]) -> Self {
+    pub fn from_pk_bytes(pk: [u8; 32]) -> Self {
         Self {
-            sk: Some(sk),
+            sk: None,
             pk: Some(pk),
+        }
+    }
+
+    pub fn from_bytes(sk: [u8; 32]) -> Self {
+        let sk = ed25519_dalek::SigningKey::from_bytes(&sk);
+        let pk = sk.verifying_key();
+        let sk_bytes = sk.to_bytes();
+        let pk_bytes = pk.to_bytes();
+        Self {
+            sk: Some(sk_bytes),
+            pk: Some(pk_bytes),
         }
     }
 

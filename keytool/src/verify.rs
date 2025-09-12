@@ -1,14 +1,23 @@
+use std::path::PathBuf;
+use std::str::FromStr;
+
 use crate::argv::VerifyArgs;
 use ed25519_dalek::{Verifier, VerifyingKey};
 use hl_core::rhex::signature::SigType;
-use hl_io::store;
+use hl_io::fs::rhex::FileSource;
+use hl_io::source::RhexSource;
 
 pub fn verify(verify_args: &VerifyArgs) -> Result<(), anyhow::Error> {
     let input = &verify_args.input;
     println!("Verifying: {}", input);
 
     // Get the rhex input
-    let rhex = store::rhex::load_rhex(input)?;
+    let mut rhex = FileSource::new(PathBuf::from_str(&input.clone())?)?;
+    let rhex = rhex.next()?;
+    if rhex.is_none() {
+        anyhow::bail!("Invalid Rhex");
+    }
+    let rhex = rhex.unwrap();
 
     if rhex.signatures.len() == 0 {
         anyhow::bail!("No signatures found");

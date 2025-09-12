@@ -1,13 +1,16 @@
-use std::{fs, path::PathBuf, str::FromStr};
+use std::{path::PathBuf, str::FromStr};
 
 use anyhow::{Error, bail};
 use ed25519_dalek::{Signer, SigningKey};
 use hl_core::{
-    Rhex,
     rhex::rhex::RhexStatus,
     rhex::signature::{SigType, Signature},
 };
-use hl_io::store::{self, authority as authority_store};
+use hl_io::{
+    fs::{authority as authority_store, rhex::FileSource},
+    sink::RhexSink,
+    source::RhexSource,
+};
 
 use crate::argv::SignArgs;
 
@@ -20,13 +23,10 @@ pub fn sign(sign_args: &SignArgs) -> Result<(), Error> {
     let output = &sign_args.output;
 
     let password = if *hot { None } else { password.clone() };
-    let rhex_bin: Vec<u8> = if fs::exists(input)? {
-        fs::read(input)?
-    } else {
-        bail!("Input file does not exist")
-    };
-    let rhex = Rhex::from_cbor(&rhex_bin);
-    let rhex = if rhex.is_err() {
+    let mut rhex = FileSource::new(PathBuf::from_str(input)?)?;
+    let rhex = rhex.next()?;
+
+    let rhex = if rhex.is_none() {
         None
     } else {
         Some(rhex.unwrap())
@@ -126,10 +126,14 @@ pub fn sign(sign_args: &SignArgs) -> Result<(), Error> {
         }
     }
 
-    let stored = store::rhex::store_rhex(output, &rhex);
-    if stored.is_err() {
-        bail!("Failed to store Rhex")
+    let pb = PathBuf::from_str(output)?;
+    let mut dir_sink = hl_io::fs::rhex::DirSink::new(pb);
+    let status = dir_sink.send(&rhex.clone());
+    match status {
+        Ok(_) => {}
+        Err(e) => {
+            bail!("Error writing rhex: {}", e);
+        }
     }
-
     Ok(())
 }

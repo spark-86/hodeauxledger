@@ -3,6 +3,7 @@ mod argv;
 mod craft;
 mod design;
 mod finalize;
+mod genesis;
 mod validate;
 
 fn main() {

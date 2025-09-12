@@ -48,7 +48,7 @@ pub struct CraftArgs {
     pub usher_pk: String,
     #[arg(short, long)]
     pub record_type: String,
-    #[arg(short, long)]
+    #[arg(short, long, value_name = "FILE")]
     pub data: String,
 }
 

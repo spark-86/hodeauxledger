@@ -1,6 +1,6 @@
 use crate::argv::ViewArgs;
 use hl_core::to_base64;
-use hl_io::store::authority as authority_store;
+use hl_io::fs::authority as authority_store;
 use std::{path::PathBuf, str::FromStr};
 
 pub fn view(view_args: &ViewArgs) -> Result<(), anyhow::Error> {

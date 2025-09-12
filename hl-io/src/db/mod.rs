@@ -1,6 +1,11 @@
+use rusqlite::Connection;
 use std::fs;
 
-use rusqlite::Connection;
+pub mod authority;
+pub mod policy;
+pub mod rhex;
+pub mod scope;
+pub mod usher;
 
 pub fn delete_db(path: &str) -> Result<(), anyhow::Error> {
     let delete_status = fs::remove_file(path);

@@ -1,5 +1,5 @@
 use hl_core::{Key, to_base64};
-use hl_io::store;
+use hl_io::fs as hl_fs;
 use std::{fs, path::PathBuf, str::FromStr};
 
 use crate::argv::GenerateArgs;
@@ -13,9 +13,9 @@ pub fn generate_keypair(args: &GenerateArgs) -> Result<(), anyhow::Error> {
     key.generate()?;
     if *hot {
         // We have a hot key, save it to disk as is
-        println!("Saving hot key to disk");
+        println!("Saving hot key to file system");
         let pb = PathBuf::from_str(keypath)?;
-        store::authority::save_key_hot(&pb, &key.sk.unwrap())?;
+        hl_fs::authority::save_key_hot(&pb, &key.sk.unwrap())?;
     } else {
         // We are requesting to save it encrypted
         let password = &args.key.password;
@@ -23,12 +23,12 @@ pub fn generate_keypair(args: &GenerateArgs) -> Result<(), anyhow::Error> {
             anyhow::bail!("Password required")
         }
         let password = password.as_ref().unwrap();
-        println!("Saving encrypted key to disk");
+        println!("Saving encrypted key to file system");
         let pb = PathBuf::from_str(keypath)?;
         if pb.exists() {
             fs::remove_file(&pb)?;
         }
-        store::authority::save_key(&pb, password, &key.sk.unwrap())?;
+        hl_fs::authority::save_key(&pb, password, &key.sk.unwrap())?;
     };
     if *show_sk && key.sk.is_some() {
         println!("Showing secret key: {}", to_base64(&key.sk.unwrap()));

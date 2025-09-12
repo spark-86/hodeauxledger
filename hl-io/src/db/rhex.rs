@@ -1,0 +1,143 @@
+use crate::sink::RhexSink;
+use crate::source::RhexSource;
+use hl_core::{Context, Intent, Rhex};
+use rusqlite::{Connection, params};
+
+pub struct CacheSource {
+    scope: String,
+    conn: Connection,
+}
+
+impl CacheSource {
+    pub fn new(path: String, scope: String) -> Self {
+        let conn = Connection::open(&path).unwrap();
+        Self { conn, scope }
+    }
+}
+
+impl RhexSource for CacheSource {
+    fn next(&mut self) -> Result<Option<Rhex>, anyhow::Error> {
+        let mut stmt = self.conn.prepare(
+            r#"
+            SELECT
+                previous_hash,
+                scope,
+                nonce,
+                author_pk,
+                usher_pk,
+                record_type,
+                data,
+                at,
+                spacial,
+                signatures
+            FROM rhex
+            WHERE scope = ?1
+            "#,
+        )?;
+
+        let mut rows = stmt.query(rusqlite::params![&self.scope])?;
+
+        fn parse_spacial(
+            s: Option<String>,
+        ) -> (Option<f64>, Option<f64>, Option<f64>, Option<String>) {
+            if let Some(s) = s {
+                let parts: Vec<_> = s.split('/').collect();
+                if parts.len() == 4 {
+                    let x = parts[0].parse::<f64>().ok();
+                    let y = parts[1].parse::<f64>().ok();
+                    let z = parts[2].parse::<f64>().ok();
+                    let refer = Some(parts[3].to_string());
+                    return (x, y, z, refer);
+                }
+            }
+            (None, None, None, None)
+        }
+
+        if let Some(row) = rows.next()? {
+            let data_json: String = row.get("data")?;
+            let signatures_json: String = row.get("signatures")?;
+            let (x, y, z, refer) = parse_spacial(row.get::<_, Option<String>>("spacial")?);
+
+            let rhex = Rhex {
+                magic: *b"RHEX\x00\x00",
+                intent: Intent {
+                    previous_hash: row.get("previous_hash")?,
+                    scope: row.get("scope")?,
+                    nonce: row.get("nonce")?,
+                    author_pk: row.get("author_pk")?,
+                    usher_pk: row.get("usher_pk")?,
+                    record_type: row.get("record_type")?,
+                    data: serde_json::from_str(&data_json)?,
+                },
+                context: Context {
+                    at: row.get("at")?,
+                    x,
+                    y,
+                    z,
+                    refer,
+                },
+                signatures: serde_json::from_str(&signatures_json)?,
+                current_hash: None,
+            };
+
+            return Ok(Some(rhex));
+        }
+
+        Ok(None)
+    }
+}
+
+pub struct CacheSink {
+    conn: Connection,
+}
+
+impl CacheSink {
+    pub fn new(path: String) -> Self {
+        let conn = Connection::open(&path).unwrap();
+        Self { conn }
+    }
+}
+
+impl RhexSink for CacheSink {
+    fn send(&mut self, r: &Rhex) -> Result<(), anyhow::Error> {
+        let data_string = serde_json::to_string(&r.intent.data)?;
+        let signatures = serde_json::to_string(&r.signatures)?;
+        let spacial = if r.context.x.is_some() {
+            // If we have one we should have them all.
+
+            // TODO: I know, this breaks if refer has a "/" in it.
+            // I'm hella lazy today and don't feel like fighting it.
+            assert!(r.context.y.is_some());
+            assert!(r.context.z.is_some());
+            assert!(r.context.refer.is_some());
+            format!(
+                "{}/{}/{}/{}",
+                r.context.x.unwrap(),
+                r.context.y.unwrap(),
+                r.context.z.unwrap(),
+                r.context.refer.clone().unwrap()
+            )
+        } else {
+            String::new()
+        };
+        self.conn.execute(
+            "INSERT INTO rhex (previous_hash, scope, nonce, author_pk, usher_pk, record_type, data, at, spacial, signatures) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            params![
+                r.intent.previous_hash,
+                r.intent.scope,
+                r.intent.nonce,
+                r.intent.author_pk,
+                r.intent.usher_pk,
+                r.intent.record_type,
+                data_string,
+                r.context.at,
+                spacial,
+                signatures
+            ],
+        )?;
+        Ok(())
+    }
+    fn flush(&mut self) -> Result<(), anyhow::Error> {
+        Ok(())
+    }
+}

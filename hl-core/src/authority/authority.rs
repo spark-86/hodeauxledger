@@ -1,6 +1,7 @@
 use crate::Key;
 
 pub struct Authority {
+    pub scope: String,
     pub key: Key,
     pub roles: Vec<String>,
     pub eff: Option<u64>,
@@ -11,6 +12,7 @@ pub struct Authority {
 impl Authority {
     pub fn new() -> Self {
         Self {
+            scope: String::new(),
             key: Key::new(),
             roles: Vec::new(),
             eff: None,
