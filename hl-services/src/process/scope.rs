@@ -1,9 +1,9 @@
-use anyhow::Ok;
 use hl_core::{
     Authority, Key, Policy, Rhex,
+    policy::rule::Rule,
     scope::scope::{Scope, ScopeRoles},
 };
-use hl_io::db::{self, connect_db};
+use hl_io::db;
 
 pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error> {
     match rhex.intent.record_type.as_str() {
@@ -20,26 +20,42 @@ pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error>
 fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error> {
     // Ok, we have a genesis, which is our starting point of the scope.
 
-    // First thing is to create the scope in the database
-    db::scope::store_scope(&Scope {
+    // Flush the info we have for this scope
+    db::scope::flush_scope_full(&rhex.intent.scope)?;
+
+    // Make the primary rule
+    let mut basic_rule = Rule::new(&rhex.intent.scope);
+    basic_rule.append_roles = vec!["authority".to_string()];
+    basic_rule.record_types = vec!["policy:set".to_string()];
+    basic_rule.quorum_k = 1;
+    basic_rule.quorum_roles = vec!["authority".to_string()];
+    basic_rule.rate_per_mark = 90;
+
+    // Build the Authority
+    let authority = Authority {
+        scope: rhex.intent.scope.clone(),
+        roles: vec!["authority".to_string()],
+        key: Key::from_pk_bytes(rhex.intent.author_pk),
+        eff: None,
+        exp: None,
+        note: Some("Default genesis authority".to_string()),
+    };
+
+    // Build the scope and store all it's subcomponents
+    db::scope::store_scope_full(&Scope {
         name: rhex.intent.scope.clone(),
         role: ScopeRoles::NoCache,
         last_synced: 0,
-        policy: Policy::new(),
-        authorities: vec![],
-        ushers: vec![],
-    })?;
-    db::authority::store_authority(
-        &rhex.intent.scope,
-        &Authority {
+        policy: Some(Policy {
             scope: rhex.intent.scope.clone(),
-            roles: vec!["authority".to_string()],
-            key: Key::from_pk_bytes(rhex.intent.author_pk),
+            quorum_ttl: 1_000_000_000,
             eff: None,
             exp: None,
-            note: Some("Default genesis authority".to_string()),
-        },
-    )?;
-    db::policy::store_policy(&rhex.intent.scope, &Policy::new())?;
+            note: None,
+            rules: vec![basic_rule],
+        }),
+        authorities: vec![authority],
+        ushers: vec![],
+    })?;
     Ok(())
 }

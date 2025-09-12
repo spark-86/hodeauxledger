@@ -6,7 +6,7 @@ pub struct Scope {
     pub name: String,
     pub role: ScopeRoles,
     pub last_synced: u64,
-    pub policy: Policy,
+    pub policy: Option<Policy>,
     pub authorities: Vec<Authority>,
     pub ushers: Vec<Usher>,
 }
@@ -46,7 +46,7 @@ impl Scope {
             name: name.to_string(),
             role,
             last_synced: 0,
-            policy: Policy::new(),
+            policy: None,
             authorities: vec![],
             ushers: vec![],
         }

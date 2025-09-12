@@ -3,8 +3,12 @@ use std::{path::PathBuf, str::FromStr};
 use anyhow::{Error, bail};
 use ed25519_dalek::{Signer, SigningKey};
 use hl_core::{
-    rhex::rhex::RhexStatus,
-    rhex::signature::{SigType, Signature},
+    Context,
+    rhex::{
+        rhex::RhexStatus,
+        signature::{SigType, Signature},
+    },
+    time::clock::GTClock,
 };
 use hl_io::{
     fs::{authority as authority_store, rhex::FileSource},
@@ -44,6 +48,16 @@ pub fn sign(sign_args: &SignArgs) -> Result<(), Error> {
             match sig_type {
                 "author" => {
                     // Process signing
+                    if rhex.signatures.len() == 0 {
+                    } else {
+                        bail!("Author already signed")
+                    }
+                }
+                "usher" => {
+                    bail!("Author not signed")
+                }
+                "quorum" => {
+                    bail!("Author not signed")
                 }
                 _ => {
                     bail!("Invalid signature type")
@@ -52,12 +66,73 @@ pub fn sign(sign_args: &SignArgs) -> Result<(), Error> {
         }
         RhexStatus::AuthorSigned => {
             // We are awaiting usher signature
+            match sig_type {
+                "author" => {
+                    bail!("Author already signed")
+                }
+                "usher" => {
+                    if rhex.signatures.len() > 1 {
+                        bail!("Usher already signed")
+                    } else {
+                        if rhex.signatures.len() == 1 {
+                            if rhex.signatures[0].sig_type != SigType::Author {
+                                bail!("Author not signed")
+                            }
+                        }
+                    }
+                }
+                "quorum" => {
+                    bail!("Usher not signed")
+                }
+                _ => {
+                    bail!("Invalid signature type")
+                }
+            }
         }
         RhexStatus::UsherSigned => {
             // We are awaiting quorum signature
+            match sig_type {
+                "author" => {
+                    bail!("Author not signed")
+                }
+                "usher" => {
+                    bail!("Usher already signed")
+                }
+                "quorum" => {
+                    if rhex.signatures.len() > 2 {
+                        bail!("Quorum already signed")
+                    } else {
+                        if rhex.signatures.len() == 2 {
+                            if rhex.signatures[0].sig_type != SigType::Author {
+                                bail!("Author not signed")
+                            }
+                            if rhex.signatures[1].sig_type != SigType::Usher {
+                                bail!("Usher not signed")
+                            }
+                        }
+                    }
+                }
+                _ => {
+                    bail!("Invalid signature type")
+                }
+            }
         }
         RhexStatus::QuorumSigned(_) => {
             // We have X signatures now
+            match sig_type {
+                "author" => {
+                    bail!("Author already signed")
+                }
+                "usher" => {
+                    bail!("Usher already signed")
+                }
+                "quorum" => {
+                    bail!("Quorum already signed")
+                }
+                _ => {
+                    bail!("Invalid signature type")
+                }
+            }
         }
         _ => {
             bail!("Invalid Rhex status {:?}", status)
@@ -85,6 +160,10 @@ pub fn sign(sign_args: &SignArgs) -> Result<(), Error> {
             rhex.signatures.push(new_sig);
         }
         "usher" => {
+            // Update context
+            let time = GTClock::now_micromarks_u64(&GTClock::new(0));
+            let context = Context::from_at(time);
+            rhex.context = context;
             // Process signing
             let author_sig = &rhex
                 .signatures

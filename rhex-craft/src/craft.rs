@@ -42,7 +42,7 @@ pub fn craft(craft_args: &CraftArgs) -> Result<(), anyhow::Error> {
     let rhex_intent = Intent {
         previous_hash: ph_opt,
         scope: scope.to_string(),
-        nonce: nonce_opt.clone().unwrap_or_default(),
+        nonce: nonce_opt.clone().unwrap_or(Intent::gen_nonce()),
         author_pk: author_pk?,
         usher_pk: usher_pk?,
         record_type: record_type.to_string(),

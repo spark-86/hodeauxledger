@@ -5,6 +5,7 @@ pub mod key;
 pub mod policy;
 pub mod rhex;
 pub mod scope;
+pub mod time;
 pub mod usher;
 
 pub use b64::b64::from_base64;

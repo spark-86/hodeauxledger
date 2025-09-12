@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 use serde_with::{Bytes, serde_as};
 
@@ -19,6 +21,17 @@ impl TryFrom<u8> for SigType {
             2 => Ok(SigType::Quorum),
             _ => Err(anyhow::anyhow!("Invalid SigType value: {}", value)),
         }
+    }
+}
+
+impl fmt::Display for SigType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            SigType::Author => "Author",
+            SigType::Usher => "Usher",
+            SigType::Quorum => "Quorum",
+        };
+        write!(f, "{}", s)
     }
 }
 

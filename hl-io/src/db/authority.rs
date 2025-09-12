@@ -45,7 +45,8 @@ pub fn store_authority(scope: &str, authority: &Authority) -> Result<(), anyhow:
     Ok(())
 }
 
-pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
+pub fn build_table() -> Result<(), anyhow::Error> {
+    let conn = connect_db("./ledger/cache/cache.db")?;
     conn.execute(
         "CREATE TABLE IF NOT EXISTS authorities (
                 scope TEXT,

@@ -5,6 +5,7 @@ mod design;
 mod finalize;
 mod genesis;
 mod validate;
+mod view;
 
 fn main() {
     let parsed = argv::Cli::parse();
@@ -33,6 +34,9 @@ fn main() {
         }
         argv::Commands::Validate(validate_args) => {
             validate::validate(&validate_args);
+        }
+        argv::Commands::View(view_args) => {
+            view::view(&view_args);
         }
     }
 }

@@ -141,3 +141,24 @@ impl RhexSink for CacheSink {
         Ok(())
     }
 }
+
+pub fn build_table() -> Result<(), anyhow::Error> {
+    let conn = Connection::open("./ledger/cache/cache.db").unwrap();
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS rhex (
+                previous_hash TEXT,
+                scope TEXT,
+                nonce INTEGER,
+                author_pk TEXT,
+                usher_pk TEXT,
+                record_type TEXT,
+                data TEXT,
+                at INTEGER,
+                spacial TEXT,
+                signatures TEXT,
+                PRIMARY KEY (previous_hash)
+            )",
+        [],
+    )?;
+    Ok(())
+}

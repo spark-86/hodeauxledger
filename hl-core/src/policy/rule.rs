@@ -9,9 +9,9 @@ pub struct Rule {
 }
 
 impl Rule {
-    pub fn new() -> Self {
+    pub fn new(scope: &str) -> Self {
         Self {
-            scope: "".to_string(),
+            scope: scope.to_string(),
             record_types: vec![],
             append_roles: vec![],
             quorum_k: 0,

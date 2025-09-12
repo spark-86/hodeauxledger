@@ -39,7 +39,7 @@ pub struct SignArgs {
     #[arg(short, long)]
     pub input: String,
 
-    #[arg(short, long)]
+    #[arg(short, long, value_name = "DIR")]
     pub output: String,
 }
 

@@ -19,6 +19,31 @@ pub fn store_scope(scope: &Scope) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
+pub fn store_scope_full(scope: &Scope) -> Result<(), anyhow::Error> {
+    let cache = connect_db("./ledger/cache/cache.db")?;
+    let status = cache.execute(
+        "INSERT OR REPLACE INO scopes (scope, role, last_synced) VALUES (?1, ?2, ?3)",
+        params![scope.name, scope.role.to_string(), scope.last_synced],
+    );
+    match status {
+        Ok(_) => {
+            for auth in scope.authorities.iter() {
+                crate::db::authority::store_authority(&scope.name, &auth)?;
+            }
+            if scope.policy.is_some() {
+                crate::db::policy::store_policy_full(&scope.name, &scope.policy.clone().unwrap())?;
+            }
+            for usher in scope.ushers.iter() {
+                crate::db::usher::store_usher(&scope.name, &usher)?;
+            }
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
+    }
+    Ok(())
+}
+
 pub fn retrieve_scope(scope_name: &str) -> Result<Scope, anyhow::Error> {
     let cache = connect_db("./ledger/cache/cache.db")?;
 
@@ -30,7 +55,7 @@ pub fn retrieve_scope(scope_name: &str) -> Result<Scope, anyhow::Error> {
             name: row.get("scope")?,
             role: row.get::<_, String>("role")?.into(),
             last_synced: row.get("last_synced")?,
-            policy: Policy::new(),
+            policy: None,
             authorities: vec![],
             ushers: vec![],
         };
@@ -38,6 +63,24 @@ pub fn retrieve_scope(scope_name: &str) -> Result<Scope, anyhow::Error> {
     } else {
         Err(anyhow::anyhow!("Scope not found"))
     }
+}
+
+pub fn flush_scope(scope_name: &str) -> Result<(), anyhow::Error> {
+    let cache = connect_db("./ledger/cache/cache.db")?;
+    cache.execute("DELETE FROM scopes WHERE scope = ?1", params![scope_name])?;
+    Ok(())
+}
+
+pub fn flush_scope_full(scope_name: &str) -> Result<(), anyhow::Error> {
+    let cache = connect_db("./ledger/cache/cache.db")?;
+    cache.execute("DELETE FROM scopes WHERE scope = ?1", params![scope_name])?;
+    cache.execute(
+        "DELETE FROM authorities WHERE scope = ?1",
+        params![scope_name],
+    )?;
+    cache.execute("DELETE FROM policies WHERE scope = ?1", params![scope_name])?;
+    cache.execute("DELETE FROM ushers WHERE scope = ?1", params![scope_name])?;
+    Ok(())
 }
 
 pub fn build_table() -> Result<(), anyhow::Error> {

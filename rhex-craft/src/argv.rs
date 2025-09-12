@@ -16,6 +16,7 @@ pub enum Commands {
     Craft(CraftArgs),
     Finalize(FinalizeArgs),
     Validate(ValidateArgs),
+    View(ViewArgs),
 }
 
 #[derive(Args, Debug)]
@@ -62,4 +63,10 @@ pub struct FinalizeArgs {
 pub struct ValidateArgs {
     #[command(flatten)]
     pub io: Io,
+}
+
+#[derive(Args, Debug)]
+pub struct ViewArgs {
+    #[arg(short, long)]
+    pub input: String,
 }
