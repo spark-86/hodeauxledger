@@ -1,5 +1,5 @@
-use crate::sink::RhexSink;
 use crate::source::RhexSource;
+use crate::{db::connect_db, sink::RhexSink};
 use hl_core::{Context, Intent, Rhex};
 use rusqlite::{Connection, params};
 
@@ -139,6 +139,19 @@ impl RhexSink for CacheSink {
     }
     fn flush(&mut self) -> Result<(), anyhow::Error> {
         Ok(())
+    }
+}
+
+pub fn check_nonce(scope: &str, nonce: &str) -> Result<bool, anyhow::Error> {
+    let cache = connect_db("./ledger/cache/cache.db")?;
+    let mut stmt =
+        cache.prepare("SELECT COUNT(*) as count FROM nonces WHERE scope = ?1 AND nonce = ?2")?;
+    let mut rows = stmt.query(params![scope, nonce])?;
+    if let Some(row) = rows.next()? {
+        let count: i64 = row.get("count")?;
+        Ok(count > 0)
+    } else {
+        Ok(false)
     }
 }
 

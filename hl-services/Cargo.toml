@@ -5,6 +5,8 @@ edition.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+serde_json.workspace = true
+regex.workspace = true
 
 hl-core = { path = "../hl-core" }
 hl-io = { path = "../hl-io" }

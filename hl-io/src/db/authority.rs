@@ -1,5 +1,4 @@
 use hl_core::{Authority, Key};
-use rusqlite::Connection;
 
 use crate::db::connect_db;
 

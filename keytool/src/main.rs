@@ -3,6 +3,7 @@ use clap::Parser;
 use crate::argv::Commands;
 
 mod argv;
+mod b64;
 mod generate;
 mod sign;
 mod verify;
@@ -30,5 +31,6 @@ fn main() {
         Commands::Sign(sign_args) => sign::sign(&sign_args).expect("Failed to sign"),
         Commands::Verify(verify_args) => verify::verify(&verify_args).expect("Failed to verify"),
         Commands::View(view_args) => view::view(&view_args).expect("Failed to view"),
+        Commands::Base64(b64_args) => b64::base64convert(&b64_args).expect("Failed to convert"),
     }
 }

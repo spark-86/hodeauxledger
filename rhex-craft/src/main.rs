@@ -36,7 +36,13 @@ fn main() {
             validate::validate(&validate_args);
         }
         argv::Commands::View(view_args) => {
-            view::view(&view_args);
+            let status = view::view(&view_args);
+            match status {
+                Ok(_) => {}
+                Err(e) => {
+                    println!("Error: {}", e);
+                }
+            }
         }
     }
 }

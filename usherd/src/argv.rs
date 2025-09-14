@@ -25,9 +25,8 @@ pub struct ListenArgs {
     pub port: String,
     #[arg(long)]
     pub host: String,
-
-    #[arg(long)]
-    pub hot_key: Option<String>,
+    #[arg(short, long)]
+    pub config: Option<String>,
 }
 
 #[derive(Args, Debug)]

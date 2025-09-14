@@ -2,6 +2,7 @@ use rusqlite::Connection;
 use std::fs;
 
 pub mod authority;
+pub mod head;
 pub mod policy;
 pub mod rhex;
 pub mod rule;

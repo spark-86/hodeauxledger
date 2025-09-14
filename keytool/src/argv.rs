@@ -16,6 +16,7 @@ pub enum Commands {
     Verify(VerifyArgs),
     Generate(GenerateArgs),
     View(ViewArgs),
+    Base64(B64Args),
 }
 
 #[derive(Args, Debug)]
@@ -65,4 +66,13 @@ pub struct ViewArgs {
 
     #[arg(long)]
     pub show_sk: bool,
+}
+
+#[derive(Args, Debug)]
+pub struct B64Args {
+    #[arg(short, long)]
+    pub input: String,
+
+    #[arg(short, long)]
+    pub output: String,
 }

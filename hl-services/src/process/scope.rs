@@ -5,19 +5,18 @@ use hl_core::{
 };
 use hl_io::db;
 
-pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error> {
+pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow::Error> {
     match rhex.intent.record_type.as_str() {
-        "scope:genesis" => scope_genesis(rhex, first_time)?,
+        "scope:genesis" => scope_genesis(rhex, first_time),
         _ => {
             return Err(anyhow::anyhow!(
                 "Unsupported record type for scope processing"
             ));
         }
     }
-    Ok(())
 }
 
-fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error> {
+fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow::Error> {
     // Ok, we have a genesis, which is our starting point of the scope.
 
     // Flush the info we have for this scope
@@ -57,5 +56,12 @@ fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<(), anyhow::Error> {
         authorities: vec![authority],
         ushers: vec![],
     })?;
-    Ok(())
+    if first_time {
+        // this is one of those records we don't do anything with
+        // on creation since technically this gets bundled with
+        // scope:request.
+
+        // For where this gets written to the fs, see scope:request
+    }
+    Ok(Vec::new())
 }

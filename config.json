@@ -1,0 +1,14 @@
+{
+    "host": "localhost",
+    "port": 1984,
+    "bin_dir": "/var/ledger/bin",
+    "fs_dir": "/var/ledger/fs",
+    "data_dir": "/var/ledger/data",
+    "keys_dir": "/var/ledger/keys",
+    "cache_db": "/var/ledger/cache.db",
+    "hot_keys": [
+        "/var/ledger/keys/usher1.hot.sk",
+        "/var/ledger/keys/usher2.hot.sk",
+        "/var/ledger/keys/usher3.hot.sk"
+    ]
+}

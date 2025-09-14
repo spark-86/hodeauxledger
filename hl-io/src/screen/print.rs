@@ -4,7 +4,7 @@ pub fn pretty_print(rhex: &Rhex) -> Result<(), anyhow::Error> {
     println!("{{");
     println!("    \"magic\": \"{:?}\",", rhex.magic);
     println!("    \"intent\": {{");
-    if (rhex.intent.previous_hash.is_none()) {
+    if rhex.intent.previous_hash.is_none() {
         println!("        \"previous_hash\": null,");
     } else {
         println!(
@@ -29,10 +29,20 @@ pub fn pretty_print(rhex: &Rhex) -> Result<(), anyhow::Error> {
     println!("    }},");
     println!("    \"context\": {{");
     println!("        \"at\": {},", rhex.context.at);
-    println!("        \"x\": {:?},", rhex.context.x);
-    println!("        \"y\": {:?},", rhex.context.y);
-    println!("        \"z\": {:?},", rhex.context.z);
-    println!("        \"refer\": \"{:?}\",", rhex.context.refer);
+    if rhex.context.x.is_some() {
+        println!("        \"x\": {},", rhex.context.x.unwrap());
+        println!("        \"y\": {},", rhex.context.y.unwrap());
+        println!("        \"z\": {},", rhex.context.z.unwrap());
+        println!(
+            "        \"refer\": \"{}\",",
+            rhex.context.refer.clone().unwrap()
+        );
+    } else {
+        println!("        \"x\": null,");
+        println!("        \"y\": null,");
+        println!("        \"z\": null,");
+        println!("        \"refer\": null,");
+    }
     println!("    }},");
     println!("    \"signatures\": [");
     for sig in rhex.signatures.iter() {
