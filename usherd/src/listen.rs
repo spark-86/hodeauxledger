@@ -99,8 +99,9 @@ async fn handle_conn(
         }
 
         // do your real handling here, using `config` if needed
-        process::process_rhex(rhex, true, &config)
-        let out_rhex = vec![rhex_in];
+
+        let out_rhex = process::process_rhex(&rhex_in, true, &config)?;
+        //let out_rhex = vec![rhex_in];
 
         for rhex in out_rhex {
             let mut out_buf = BytesMut::new();
@@ -133,9 +134,13 @@ pub async fn listen(listen_args: &ListenArgs, verbose: bool) -> Result<(), Error
     let port = &listen_args.port;
     let host = &listen_args.host;
     let config_file = &listen_args.config;
+    let config_file = if config_file.is_some() {
+        config_file.as_ref().unwrap()
+    } else {
+        &"config.json".to_string()
+    };
 
-    let cfg = hl_services::config::load_config(&config_file.clone().unwrap())?;
-    let config = Arc::new(cfg); // ← wrap in Arc
+    let config = Arc::new(hl_services::config::load_config(config_file)?); // ← wrap in Arc
 
     let listener = setup_listener(host, port).await?;
     println!("[LISTENING {host}:{port}]");

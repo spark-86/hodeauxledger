@@ -1,7 +1,7 @@
 use crate::{build::error::error_rhex, scope::access::can_access};
 use hl_core::{
     Config, Rhex,
-    error::{self, E_PREVIOUS_NOT_FOUND},
+    error::{self, E_PREVIOUS_NOT_FOUND, E_USHER_MISMATCH},
 };
 use hl_io::db::{head, rhex::check_nonce};
 use std::sync::Arc;
@@ -14,7 +14,7 @@ pub mod scope;
 pub fn process_rhex(
     rhex: &Rhex,
     first_time: bool,
-    config: Arc<Config>,
+    config: &Arc<Config>,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
     let mut outbound = Vec::new();
     let mut error_stack = Vec::new();
@@ -98,13 +98,37 @@ pub fn process_rhex(
 
     // 2) Check usher_pk against our own keys and see if it is
     // us. If not, see if we are looking for quorum sigs
-
-    // 2a) usher_pk doesn't match. Do we have the appropriate sigs
-    // for us to attest to quorum.
+    let mut status = false;
+    for hot_key in config.hot_keys.clone() {
+        if rhex.intent.usher_pk == hot_key {
+            status = true;
+        }
+    }
+    if !status {
+        // 2a) usher_pk doesn't match. Do we have the appropriate sigs
+        // for us to attest to quorum.
+        if rhex.signatures.len() == 2 {
+            // Make sure they are author and usher
+            if rhex.signatures[0].public_key != rhex.intent.author_pk {
+                error_stack.push(E_USHER_MISMATCH.to_string());
+                error_messages
+                    .push("rhex.intent.author_pk does not match first signature".to_string());
+            }
+            if rhex.signatures[1].public_key != rhex.intent.usher_pk {
+                error_stack.push(E_USHER_MISMATCH.to_string());
+                error_messages
+                    .push("rhex.intent.usher_pk does not match second signature".to_string());
+            }
+        } else {
+            error_stack.push(E_USHER_MISMATCH.to_string());
+            error_messages.push("rhex.intent.usher_pk does not match any of our keys".to_string());
+        }
+    }
 
     // 3) Do we have an author signature?
-
-    // 3a) We don't
+    if rhex.signatures.len() > 0 {
+        // 3a) We don't, and ushers don't sign as author this way
+    }
 
     // 3b) We do, does it verify?
 
