@@ -1,0 +1,8 @@
+{
+    "schema": "rhex://schema/key-grant@0",
+    "note": "Core Usher Root Authority Key",
+    "public_key": "Verovb4OonvaMlB4LArN7dleHx_n7GHe8dDn411CEQ0",
+    "roles": ["authority"],
+    "expiration_micromark": 365000000000,
+    "effective_micromark": 0
+}

@@ -30,4 +30,7 @@ pub struct ListenArgs {
 }
 
 #[derive(Args, Debug)]
-pub struct RebuildArgs {}
+pub struct RebuildArgs {
+    #[arg(short, long)]
+    pub config: Option<String>,
+}

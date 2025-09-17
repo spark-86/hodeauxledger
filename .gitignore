@@ -26,3 +26,4 @@ target
 *.key
 *.rhex
 ledger/
+*.sk

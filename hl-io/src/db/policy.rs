@@ -1,10 +1,9 @@
 use hl_core::Policy;
-use rusqlite::params;
+use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
-pub fn store_policy(scope: &str, policy: &Policy) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn store_policy(cache: &Connection, scope: &str, policy: &Policy) -> Result<(), anyhow::Error> {
     let status = cache.execute(
         "INSERT OR REPLACE INTO policies (scope, quorum_ttl, eff, exp, note) VALUES (?1, ?2, ?3, ?4, ?5)",
         params![scope, policy.quorum_ttl, policy.eff, policy.exp, policy.note],
@@ -19,10 +18,14 @@ pub fn store_policy(scope: &str, policy: &Policy) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn store_policy_full(scope: &str, policy: &Policy) -> Result<(), anyhow::Error> {
-    store_policy(&scope, &policy)?;
+pub fn store_policy_full(
+    cache: &Connection,
+    scope: &str,
+    policy: &Policy,
+) -> Result<(), anyhow::Error> {
+    store_policy(&cache, &scope, &policy)?;
     for rule in policy.rules.iter() {
-        crate::db::rule::store_rule(&scope, rule)?;
+        crate::db::rule::store_rule(cache, &scope, rule)?;
     }
 
     Ok(())
@@ -48,16 +51,19 @@ pub fn retrieve_policy(scope: &str) -> Result<Policy, anyhow::Error> {
         Err(anyhow::anyhow!("Policy not found for scope: {}", scope))
     }
 }
-pub fn clear_scope_policy(scope: &str) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn clear_scope_policy(cache: &Connection, scope: &str) -> Result<(), anyhow::Error> {
     cache.execute("DELETE FROM policies WHERE scope = ?1", params![scope])?;
     crate::db::rule::clear_scope_rules(scope)?;
 
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_policies(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM policies", params![])?;
+    Ok(())
+}
+
+pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE IF NOT EXISTS policies (
                 scope TEXT,

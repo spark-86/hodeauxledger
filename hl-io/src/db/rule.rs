@@ -1,12 +1,11 @@
 use hl_core::policy::rule::Rule;
-use rusqlite::params;
+use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
-pub fn store_rule(scope: &str, rule: &Rule) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn store_rule(cache: &Connection, scope: &str, rule: &Rule) -> Result<(), anyhow::Error> {
     let status = cache.execute(
-        "INSERT OR REPLACE INTO (
+        "INSERT OR REPLACE INTO 
         rules (scope, record_types, append_roles, quorum_k, quorum_roles, rate_per_mark) 
         VALUES (?1, ?2, ?3, ?4, ?5, ?6)        
     ",
@@ -74,8 +73,12 @@ pub fn clear_scope_rules(scope: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_rules(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM rules", params![])?;
+    Ok(())
+}
+
+pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE IF NOT EXISTS rules (
             scope TEXT NOT NULL,

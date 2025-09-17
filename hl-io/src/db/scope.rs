@@ -1,5 +1,5 @@
-use hl_core::scope::scope::Scope;
-use rusqlite::params;
+use hl_core::{policy::rule, scope::scope::Scope};
+use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
@@ -19,10 +19,9 @@ pub fn store_scope(scope: &Scope) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn store_scope_full(scope: &Scope) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn store_scope_full(cache: &Connection, scope: &Scope) -> Result<(), anyhow::Error> {
     let status = cache.execute(
-        "INSERT OR REPLACE INO scopes (scope, role, last_synced) VALUES (?1, ?2, ?3)",
+        "INSERT OR REPLACE INTO scopes (scope, role, last_synced) VALUES (?1, ?2, ?3)",
         params![scope.name, scope.role.to_string(), scope.last_synced],
     );
     match status {
@@ -31,7 +30,11 @@ pub fn store_scope_full(scope: &Scope) -> Result<(), anyhow::Error> {
                 crate::db::authority::store_authority(&scope.name, &auth)?;
             }
             if scope.policy.is_some() {
-                crate::db::policy::store_policy_full(&scope.name, &scope.policy.clone().unwrap())?;
+                crate::db::policy::store_policy_full(
+                    cache,
+                    &scope.name,
+                    &scope.policy.clone().unwrap(),
+                )?;
             }
             for usher in scope.ushers.iter() {
                 crate::db::usher::store_usher(&scope.name, &usher)?;
@@ -71,8 +74,7 @@ pub fn flush_scope(scope_name: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn flush_scope_full(scope_name: &str) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_scope_full(cache: &Connection, scope_name: &str) -> Result<(), anyhow::Error> {
     cache.execute("DELETE FROM scopes WHERE scope = ?1", params![scope_name])?;
     cache.execute(
         "DELETE FROM authorities WHERE scope = ?1",
@@ -83,9 +85,12 @@ pub fn flush_scope_full(scope_name: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    // FIXME: Yet another hardcoded cache location
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_scopes(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM scopes", params![])?;
+    Ok(())
+}
+
+pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE scopes (
                 scope TEXT,

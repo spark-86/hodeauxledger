@@ -1,0 +1,29 @@
+{
+    "schema": "rhex://schema/policy-set@0",
+    "note": "Initial Policy Set for Trust Architecture's Genesis",
+    "quorum_ttl": 1000000000,
+    "rules": [
+        {
+            "append_roles": ["authority"],
+            "quorum_k": 1,
+            "quorum_roles": ["authority"],
+            "rate_per_mark": 100,
+            "record_types": [
+                "policy:set",
+                "key:*",
+                "record:text",
+                "usher:*",
+                "scope:*"
+            ]
+        },
+        {
+            "append_roles": ["*"],
+            "quorum_k": 1,
+            "quorum_roles": ["authority"],
+            "rate_per_mark": 10,
+            "record_types": ["request:*"]
+        }
+    ],
+    "effective_micromark": 0,
+    "expires_micromark": 0
+}

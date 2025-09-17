@@ -142,10 +142,9 @@ impl RhexSink for CacheSink {
     }
 }
 
-pub fn check_nonce(scope: &str, nonce: &str) -> Result<bool, anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn check_nonce(cache: &Connection, scope: &str, nonce: &str) -> Result<bool, anyhow::Error> {
     let mut stmt =
-        cache.prepare("SELECT COUNT(*) as count FROM nonces WHERE scope = ?1 AND nonce = ?2")?;
+        cache.prepare("SELECT COUNT(*) as count FROM rhex WHERE scope = ?1 AND nonce = ?2")?;
     let mut rows = stmt.query(params![scope, nonce])?;
     if let Some(row) = rows.next()? {
         let count: i64 = row.get("count")?;
@@ -155,8 +154,12 @@ pub fn check_nonce(scope: &str, nonce: &str) -> Result<bool, anyhow::Error> {
     }
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let conn = Connection::open("./ledger/cache/cache.db").unwrap();
+pub fn flush_rhex(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM rhex", params![])?;
+    Ok(())
+}
+
+pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS rhex (
                 previous_hash TEXT,

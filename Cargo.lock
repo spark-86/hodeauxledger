@@ -805,10 +805,13 @@ name = "hl-services"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "ed25519-dalek",
  "hl-core",
  "hl-io",
  "regex",
+ "rusqlite",
  "serde_json",
+ "subtle",
 ]
 
 [[package]]

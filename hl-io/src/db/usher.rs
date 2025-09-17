@@ -1,5 +1,5 @@
 use hl_core::Usher;
-use rusqlite::params;
+use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
@@ -50,16 +50,12 @@ pub fn clear_by_scope(scope: &str) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn clear_all() -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
-
+pub fn flush_ushers(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute("DELETE FROM ushers", params![])?;
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
-
+pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE IF NOT EXISTS ushers (
                 scope TEXT,

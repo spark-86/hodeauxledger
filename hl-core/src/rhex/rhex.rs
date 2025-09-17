@@ -112,12 +112,17 @@ impl Rhex {
     /// Finalize: intent + context + signatures (in canonical order)
     pub fn finalize(&mut self) -> anyhow::Result<()> {
         self.sort_signatures()?;
+        let current_hash = self.generate_current_hash()?;
+        self.current_hash = Some(current_hash);
+        Ok(())
+    }
+
+    pub fn generate_current_hash(&self) -> Result<[u8; 32], anyhow::Error> {
         let mut hasher = blake3::Hasher::new();
         ciborium::ser::into_writer(&self.intent, &mut hasher)?;
         ciborium::ser::into_writer(&self.context, &mut hasher)?;
         ciborium::ser::into_writer(&self.signatures, &mut hasher)?;
-        self.current_hash = Some(*hasher.finalize().as_bytes());
-        Ok(())
+        Ok(*hasher.finalize().as_bytes())
     }
 
     pub fn sort_signatures(&mut self) -> anyhow::Result<()> {

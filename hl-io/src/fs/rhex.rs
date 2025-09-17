@@ -26,7 +26,6 @@ pub struct DirSource {
 impl DirSource {
     /// Create a new DirSource from the given directory path.
     pub fn new(root: PathBuf) -> Result<Self> {
-        // verify dir
         if !root.exists() {
             bail!("scope dir does not exist: {}", root.display());
         }
@@ -35,32 +34,25 @@ impl DirSource {
             bail!("genesis.rhex missing in {}", root.display());
         }
 
-        // load + parse genesis
         let bytes = fs::read(&genesis_path)
             .with_context(|| format!("reading {}", genesis_path.display()))?;
         let genesis = Rhex::from_cbor(&bytes)
             .with_context(|| format!("decoding {}", genesis_path.display()))?;
 
-        let next = genesis
-            .current_hash
-            .ok_or_else(|| anyhow::anyhow!("genesis.rhex has no current_hash"))?;
+        if genesis.current_hash.is_none() {
+            bail!("genesis.rhex has no current_hash");
+        }
 
         Ok(Self {
             root,
-            state: WalkState::Init,
+            state: WalkState::Init, // <-- start in Init so we yield genesis first
             genesis: Some(genesis),
-        }
-        .with_next(next))
-    }
-
-    fn with_next(mut self, next: [u8; 32]) -> Self {
-        self.state = WalkState::Next(next);
-        self
+        })
     }
 
     fn load_by_prev(&self, prev: &[u8; 32]) -> Result<Option<Rhex>> {
         let name = hash_to_name(prev);
-        let path = self.root.join(&name);
+        let path = self.root.join(&name.to_ascii_lowercase());
         if !path.exists() {
             return Ok(None); // end of chain
         }
@@ -81,10 +73,7 @@ impl RhexSource for DirSource {
                 // yield genesis first
                 if let Some(genesis) = self.genesis.take() {
                     // after yielding genesis, continue from its current_hash
-                    let next = genesis
-                        .intent
-                        .previous_hash
-                        .ok_or_else(|| anyhow::anyhow!("genesis has no current_hash"))?;
+                    let next = genesis.current_hash.unwrap_or([0u8; 32]);
                     self.state = WalkState::Next(next);
                     return Ok(Some(genesis));
                 }

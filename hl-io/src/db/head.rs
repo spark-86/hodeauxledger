@@ -1,3 +1,5 @@
+use rusqlite::{Connection, params};
+
 use crate::db::connect_db;
 
 pub fn get_head(scope: &str) -> Result<[u8; 32], anyhow::Error> {
@@ -15,8 +17,7 @@ pub fn get_head(scope: &str) -> Result<[u8; 32], anyhow::Error> {
     }
 }
 
-pub fn set_head(scope: &str, head: &[u8; 32]) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn set_head(cache: &Connection, scope: &str, head: &[u8; 32]) -> Result<(), anyhow::Error> {
     let head_b64 = hl_core::to_base64(head);
     cache.execute(
         "INSERT OR REPLACE INTO heads (scope, head) VALUES (?1, ?2)",
@@ -25,8 +26,12 @@ pub fn set_head(scope: &str, head: &[u8; 32]) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_heads(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM heads", params![])?;
+    Ok(())
+}
+
+pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE IF NOT EXISTS heads (
                 scope TEXT PRIMARY KEY,

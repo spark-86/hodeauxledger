@@ -38,11 +38,15 @@ pub fn craft(craft_args: &CraftArgs) -> Result<(), anyhow::Error> {
     let data_pb = data_pb.unwrap();
     let data = std::fs::read(data_pb)?;
     let data_json = serde_json::from_slice(&data)?;
-
+    let nonce = if nonce_opt.is_some() {
+        nonce_opt.clone()
+    } else {
+        Some(Intent::gen_nonce())
+    };
     let rhex_intent = Intent {
         previous_hash: ph_opt,
         scope: scope.to_string(),
-        nonce: nonce_opt.clone().unwrap_or(Intent::gen_nonce()),
+        nonce: nonce.expect("nonce generation failed"),
         author_pk: author_pk?,
         usher_pk: usher_pk?,
         record_type: record_type.to_string(),

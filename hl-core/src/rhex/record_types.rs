@@ -4,8 +4,6 @@ pub const RECORD_TYPES: [&str; 27] = [
     "scope:create",
     "scope:seal",
     "policy:set",
-    "authority:grant",
-    "authority:revoke",
     "usher:appoint",
     "usher:demote",
     "alias:set",
@@ -26,6 +24,8 @@ pub const RECORD_TYPES: [&str; 27] = [
     "steward:info",
     "steward:warning",
     "steward:error",
+    "key:grant",
+    "key:revoke",
 ];
 
 pub fn is_valid_record_type(record_type: &str) -> bool {

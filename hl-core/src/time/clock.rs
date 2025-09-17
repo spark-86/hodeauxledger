@@ -5,7 +5,7 @@ pub const SIDEREAL_MS: i128 = 86_164_090;
 /// Micromarks per sidereal day (1e9).
 pub const MICROMARKS_PER_TURN: i128 = 1_000_000_000;
 
-pub const EPOCH_AT_UNIX_MS: i128 = 1756704877985;
+pub const EPOCH_AT_UNIX_MS: i128 = 1757778666636;
 
 /// Clock that converts wall time to GT relative to a ledger epoch (in ms).
 #[derive(Clone, Copy, Debug)]

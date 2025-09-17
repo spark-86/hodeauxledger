@@ -4,10 +4,15 @@ use hl_core::{
     scope::scope::{Scope, ScopeRoles},
 };
 use hl_io::db;
+use rusqlite::Connection;
 
-pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow::Error> {
+pub fn process_scope(
+    rhex: &Rhex,
+    first_time: bool,
+    cache: &Connection,
+) -> Result<Vec<Rhex>, anyhow::Error> {
     match rhex.intent.record_type.as_str() {
-        "scope:genesis" => scope_genesis(rhex, first_time),
+        "scope:genesis" => scope_genesis(rhex, first_time, cache),
         _ => {
             return Err(anyhow::anyhow!(
                 "Unsupported record type for scope processing"
@@ -16,11 +21,15 @@ pub fn process_scope(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow:
     }
 }
 
-fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow::Error> {
+fn scope_genesis(
+    rhex: &Rhex,
+    first_time: bool,
+    cache: &Connection,
+) -> Result<Vec<Rhex>, anyhow::Error> {
     // Ok, we have a genesis, which is our starting point of the scope.
-
+    println!("Processing Genesis 🌐💡");
     // Flush the info we have for this scope
-    db::scope::flush_scope_full(&rhex.intent.scope)?;
+    db::scope::flush_scope_full(&cache, &rhex.intent.scope)?;
 
     // Make the primary rule
     let mut basic_rule = Rule::new(&rhex.intent.scope);
@@ -41,21 +50,24 @@ fn scope_genesis(rhex: &Rhex, first_time: bool) -> Result<Vec<Rhex>, anyhow::Err
     };
 
     // Build the scope and store all it's subcomponents
-    db::scope::store_scope_full(&Scope {
-        name: rhex.intent.scope.clone(),
-        role: ScopeRoles::NoCache,
-        last_synced: 0,
-        policy: Some(Policy {
-            scope: rhex.intent.scope.clone(),
-            quorum_ttl: 1_000_000_000,
-            eff: None,
-            exp: None,
-            note: None,
-            rules: vec![basic_rule],
-        }),
-        authorities: vec![authority],
-        ushers: vec![],
-    })?;
+    db::scope::store_scope_full(
+        cache,
+        &Scope {
+            name: rhex.intent.scope.clone(),
+            role: ScopeRoles::NoCache,
+            last_synced: 0,
+            policy: Some(Policy {
+                scope: rhex.intent.scope.clone(),
+                quorum_ttl: 1_000_000_000,
+                eff: None,
+                exp: None,
+                note: None,
+                rules: vec![basic_rule],
+            }),
+            authorities: vec![authority],
+            ushers: vec![],
+        },
+    )?;
     if first_time {
         // this is one of those records we don't do anything with
         // on creation since technically this gets bundled with

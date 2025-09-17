@@ -91,6 +91,7 @@ pub const E_CONTEXT_SPACIAL_PARSE: &str = "E_CONTEXT_SPACIAL_PARSE";
 pub const E_CONTEXT_REFER_INVALID: &str = "E_CONTEXT_REFER_INVALID";
 pub const E_NONCE_MISSING: &str = "E_NONCE_MISSING";
 pub const E_NONCE_REUSED: &str = "E_NONCE_REUSED";
+pub const E_NONCE_UNAVALIBLE: &str = "E_NONCE_UNAVALIBLE";
 pub const E_DUPLICATE_SIGNATURE: &str = "E_DUPLICATE_SIGNATURE";
 
 //// ───────────────────────── Chain / Ledger Semantics ───────────────────
@@ -100,6 +101,7 @@ pub const E_GENESIS_SCOPE_INVALID: &str = "E_GENESIS_SCOPE_INVALID";
 pub const E_GENESIS_SELF_USHER_FORBIDDEN: &str = "E_GENESIS_SELF_USHER_FORBIDDEN";
 pub const E_GENESIS_QUORUM_INSUFFICIENT: &str = "E_GENESIS_QUORUM_INSUFFICIENT";
 
+pub const E_PREV_HASH_BEHIND_HEAD: &str = "E_PREV_HASH_BEHIND_HEAD"; // previous points to older than current head
 pub const E_PREVIOUS_HASH_MISSING: &str = "E_PREVIOUS_HASH_MISSING";
 pub const E_PREVIOUS_NOT_FOUND: &str = "E_PREVIOUS_NOT_FOUND";
 pub const E_CHAIN_BREAK_PREV_MISMATCH: &str = "E_CHAIN_BREAK_PREV_MISMATCH";
@@ -127,6 +129,8 @@ pub const E_FS_READ: &str = "E_FS_READ";
 pub const E_FS_WRITE: &str = "E_FS_WRITE";
 pub const E_FS_RENAME: &str = "E_FS_RENAME";
 pub const E_FS_FSYNC: &str = "E_FS_FSYNC";
+
+pub const E_CACHE_RHEX: &str = "E_CACHE_RHEX";
 
 //// ───────────────────────── Policy / AuthZ / Rate Limit ────────────────
 

@@ -1,4 +1,5 @@
 use hl_core::{Authority, Key};
+use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
@@ -44,8 +45,12 @@ pub fn store_authority(scope: &str, authority: &Authority) -> Result<(), anyhow:
     Ok(())
 }
 
-pub fn build_table() -> Result<(), anyhow::Error> {
-    let conn = connect_db("./ledger/cache/cache.db")?;
+pub fn flush_authorities(cache: &Connection) -> Result<(), anyhow::Error> {
+    cache.execute("DELETE FROM authorities", params![])?;
+    Ok(())
+}
+
+pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS authorities (
                 scope TEXT,
