@@ -62,7 +62,7 @@ pub fn bootstrap(listen_args: &ListenArgs) -> Result<(), anyhow::Error> {
         }
         let rhex = rhex_opt.unwrap();
         if rhex.current_hash.is_some() {
-            println!("Loaded rhex: {}", to_base64(&rhex.current_hash.unwrap()));
+            //println!("Loaded rhex: {}", to_base64(&rhex.current_hash.unwrap()));
             head = rhex.current_hash.unwrap();
         } else {
             println!("Loaded rhex with no current_hash");

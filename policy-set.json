@@ -1,6 +1,6 @@
 {
     "schema": "rhex://schema/policy-set@0",
-    "note": "Initial Policy Set for Trust Architecture's Genesis",
+    "note": "Secondary Policy Set for Trust Architecture's Genesis",
     "quorum_ttl": 1000000000,
     "rules": [
         {

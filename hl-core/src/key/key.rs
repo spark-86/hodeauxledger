@@ -1,3 +1,6 @@
+use anyhow::bail;
+use ed25519_dalek::Signer;
+
 pub struct Key {
     pub sk: Option<[u8; 32]>,
     pub pk: Option<[u8; 32]>,
@@ -36,5 +39,16 @@ impl Key {
         self.sk = Some(sk_bytes);
         self.pk = Some(pk_bytes);
         Ok(())
+    }
+
+    pub fn sign(&self, hash: &[u8; 32]) -> Result<[u8; 64], anyhow::Error> {
+        if self.sk.is_none() {
+            bail!("Key has no secret key for signing");
+        }
+        let sk = ed25519_dalek::SigningKey::from_bytes(&self.sk.unwrap());
+        let signature: ed25519_dalek::Signature = sk.sign(hash);
+        let mut sig_bytes = [0u8; 64];
+        sig_bytes.copy_from_slice(&signature.to_bytes());
+        Ok(sig_bytes)
     }
 }

@@ -14,9 +14,10 @@ pub fn get_data_string(rhex: &Rhex, possible_keys: &Vec<String>) -> Result<Strin
         }
     }
 
-    Err(anyhow::anyhow!(
-        "None of the specified keys found in data or values are not strings"
-    ))
+    Err(anyhow::anyhow!(format!(
+        "None of the specified keys found in data or values are not strings {:?}",
+        possible_keys
+    )))
 }
 
 pub fn get_data_u64(rhex: &Rhex, possible_keys: &Vec<String>) -> Result<u64, anyhow::Error> {

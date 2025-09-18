@@ -28,8 +28,11 @@ pub fn get_authorities(scope: &str) -> Result<Vec<Authority>, anyhow::Error> {
     Ok(authorities)
 }
 
-pub fn store_authority(scope: &str, authority: &Authority) -> Result<(), anyhow::Error> {
-    let conn = connect_db("./ledger/cache/cache.db")?;
+pub fn store_authority(
+    conn: &Connection,
+    scope: &str,
+    authority: &Authority,
+) -> Result<(), anyhow::Error> {
     let roles = authority.roles.join(",");
     conn.execute(
         "INSERT OR REPLACE INTO authorities (scope, key, roles, eff, exp, note) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",

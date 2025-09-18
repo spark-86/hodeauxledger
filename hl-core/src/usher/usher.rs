@@ -1,5 +1,5 @@
 pub struct Usher {
-    pub name: String,
+    pub note: String,
     pub public_key: [u8; 32],
     pub host: String,
     pub port: u16,
@@ -10,7 +10,7 @@ pub struct Usher {
 impl Usher {
     pub fn new() -> Self {
         Self {
-            name: "".to_string(),
+            note: "".to_string(),
             host: "localhost".to_string(),
             public_key: [0u8; 32],
             port: 1984,

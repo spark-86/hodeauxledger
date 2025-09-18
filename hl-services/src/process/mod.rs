@@ -1,14 +1,14 @@
 use crate::{build::error::error_rhex, scope::access::can_access};
 use ed25519_dalek::{Signature as DalekSig, Verifier, VerifyingKey};
 use hl_core::{
-    Config, Policy, Rhex,
+    Config, Rhex,
     error::{
-        self, E_APPEND_DENIED, E_AUTHOR_KEY_DECODE, E_CHAIN_BREAK_PREV_MISMATCH, E_POLICY_INVALID,
-        E_PREV_HASH_BEHIND_HEAD, E_PREVIOUS_NOT_FOUND, E_QUORUM_INSUFFICIENT, E_QUORUM_KEY_DECODE,
-        E_QUORUM_SET_INVALID, E_SIG_INVALID, E_SIG_MISSING, E_USHER_MISMATCH,
+        self, E_APPEND_DENIED, E_AUTHOR_KEY_DECODE, E_PREV_HASH_BEHIND_HEAD, E_PREVIOUS_NOT_FOUND,
+        E_QUORUM_INSUFFICIENT, E_QUORUM_KEY_DECODE, E_SIG_INVALID, E_SIG_MISSING, E_USHER_MISMATCH,
     },
     policy::rule::Rule,
     rhex::signature::SigType,
+    to_base64,
 };
 use hl_io::{
     db::{self, connect_db, head, rhex::check_nonce},
@@ -24,6 +24,7 @@ mod policy;
 mod record;
 mod request;
 mod scope;
+mod usher;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Small error accumulator (mirrors your two vectors, adds nice helpers)
@@ -79,7 +80,9 @@ fn validate_basic_intent(
     errors: &mut Errors,
 ) {
     // previous_hash must exist unless genesis
-    if rhex.intent.previous_hash.is_none() && rhex.intent.record_type != "scope:genesis" {
+    if rhex.intent.previous_hash.is_none()
+        && (rhex.intent.record_type != "scope:genesis" && rhex.intent.record_type != "request:rhex")
+    {
         errors.push(
             error::E_PREVIOUS_HASH_MISSING,
             "rhex.intent.previous_hash missing",
@@ -148,7 +151,11 @@ fn validate_basic_intent(
             if head != prev {
                 errors.push(
                     E_PREV_HASH_BEHIND_HEAD,
-                    "rhex.intent.previous_hash does not match head",
+                    format!(
+                        "rhex.intent.previous_hash does not match head. Found: {}, sumbitted: {}",
+                        to_base64(&head),
+                        to_base64(&prev)
+                    ),
                 );
             }
         }
@@ -347,7 +354,6 @@ fn dispatch_record(
     rhex: &Rhex,
     first_time: bool,
     config: &Arc<Config>,
-    cache: &Connection,
 ) -> anyhow::Result<Vec<Rhex>> {
     let rt_parts: Vec<&str> = rhex.intent.record_type.split(':').collect();
     match rt_parts.get(0).copied().unwrap_or_default() {
@@ -356,15 +362,13 @@ fn dispatch_record(
             record::process_record(rhex, first_time)?;
             Ok(Vec::new())
         }
-        "request" => {
-            request::process_request(rhex, first_time)?;
-            Ok(Vec::new())
-        }
+        "request" => request::process_request(rhex, first_time, config),
         "scope" => {
-            scope::process_scope(rhex, first_time, cache)?;
+            scope::process_scope(rhex, first_time, config)?;
             Ok(Vec::new())
         }
         "key" => key::process_key(rhex, &first_time, config),
+        "usher" => usher::process_usher(rhex, first_time, config),
         _ => anyhow::bail!("Invalid record type"),
     }
 }
@@ -390,8 +394,9 @@ pub fn process_rhex(
         check_policy_access(rhex, &mut errors)?;
     }
     // 2) Usher context (are we the usher? else basic placement checks)
-    verify_usher_context(rhex, config, &mut errors);
-
+    if first_time {
+        verify_usher_context(rhex, config, &mut errors);
+    }
     // 3) Author signature validity
     verify_author_signature(rhex, &mut errors);
 
@@ -402,15 +407,18 @@ pub fn process_rhex(
     verify_quorum_if_present(rhex, &rules, &rhex.intent.record_type, &mut errors);
 
     // 6) current_hash must match computed
-    validate_current_hash(rhex, &mut errors)?;
-
+    if rhex.signatures.len() > 2 {
+        validate_current_hash(rhex, &mut errors)?;
+    }
     // TODO: Check quorum roles. This is important as we don't
     // want just any key signing quorum.
 
     // TODO:
 
     // Add to cache
-    if errors.is_empty() {
+    // FIXME: This needs to check to see if the request is set to record
+    // or not.
+    if errors.is_empty() && !rhex.intent.record_type.starts_with("request:") {
         let mut cache_source = db::rhex::CacheSink::new(config.cache_db.clone());
         let cache_status = cache_source.send(&rhex);
         if cache_status.is_err() {
@@ -422,9 +430,9 @@ pub fn process_rhex(
     }
     // 7) Execute or emit error R⬢
     if errors.is_empty() {
-        outbound = dispatch_record(rhex, first_time, config, &cache_conn)?;
+        outbound = dispatch_record(rhex, first_time, config)?;
     } else {
-        // FIXME from your note: if usher_pk may be zeros, you could choose a hot_key instead.
+        // FIXME: from your note: if usher_pk may be zeros, you could choose a hot_key instead.
         let message = errors.join_messages();
         outbound.push(error_rhex(
             &rhex.intent.scope,

@@ -1,0 +1,8 @@
+{
+    "schema": "rhex://schema/key-grant@0",
+    "note": "Schema Scope Master Key",
+    "public_key": "Sch_krkvqKBV5PwBExKI4i2k0dMG_3ok5F435VnqeYM",
+    "roles": ["authority"],
+    "expiration_micromark": 365000000000,
+    "effective_micromark": 0
+}

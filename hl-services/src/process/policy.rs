@@ -6,7 +6,7 @@ use hl_io::{
 };
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 
-use crate::process::data::{get_data_array, get_data_string, get_data_u64};
+use crate::process::data::{get_data_string, get_data_u64};
 
 pub fn process_policy(
     rhex: &Rhex,
@@ -25,7 +25,7 @@ pub fn policy_set(
     first_time: bool,
     config: &Arc<Config>,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
-    println!("Processing Policy Set 📜");
+    print!("[📜:🟡]=~=");
     let cache = connect_db(&config.cache_db)?;
 
     // Flush what we had before this policy in the cache
@@ -66,7 +66,6 @@ pub fn policy_set(
         rhex,
         &vec!["r".to_string(), "rules".to_string(), "⛓️".to_string()],
     );
-    println!("{:?}", rules);
     let policy = Policy {
         scope: rhex.intent.scope.clone(),
         quorum_ttl: quorum_ttl.unwrap_or(1_000_000_000),

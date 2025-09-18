@@ -1,4 +1,3 @@
-pub mod authority;
 pub mod bootstrap;
 pub mod build;
 pub mod config;

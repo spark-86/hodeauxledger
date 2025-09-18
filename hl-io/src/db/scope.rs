@@ -27,7 +27,7 @@ pub fn store_scope_full(cache: &Connection, scope: &Scope) -> Result<(), anyhow:
     match status {
         Ok(_) => {
             for auth in scope.authorities.iter() {
-                crate::db::authority::store_authority(&scope.name, &auth)?;
+                crate::db::authority::store_authority(&cache, &scope.name, &auth)?;
             }
             if scope.policy.is_some() {
                 crate::db::policy::store_policy_full(
@@ -37,7 +37,7 @@ pub fn store_scope_full(cache: &Connection, scope: &Scope) -> Result<(), anyhow:
                 )?;
             }
             for usher in scope.ushers.iter() {
-                crate::db::usher::store_usher(&scope.name, &usher)?;
+                crate::db::usher::store_usher(cache, &scope.name, &usher)?;
             }
         }
         Err(e) => {

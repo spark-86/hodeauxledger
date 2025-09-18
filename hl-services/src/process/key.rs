@@ -23,7 +23,7 @@ pub fn key_grant(
     first_time: &bool,
     config: &Arc<Config>,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
-    println!("Processing Key Grant 🗝️");
+    print!("[🔑:🟢]=~=");
     let cache = connect_db(&config.cache_db)?;
 
     let data_key = get_data_string(
@@ -69,7 +69,7 @@ pub fn key_grant(
         ],
     )?);
 
-    hl_io::db::authority::store_authority(&rhex.intent.scope, &authority)?;
+    hl_io::db::authority::store_authority(&cache, &rhex.intent.scope, &authority)?;
     if *first_time {
         println!(
             "Stored new authority key {} for scope {} with roles {:?}",

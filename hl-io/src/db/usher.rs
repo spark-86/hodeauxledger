@@ -13,7 +13,7 @@ pub fn get_ushers(scope: &str) -> Result<Vec<Usher>, anyhow::Error> {
     let mut ushers_out = vec![];
     while let Some(row) = rows.next()? {
         let usher = Usher {
-            name: row.get("name")?,
+            note: row.get("note")?,
             public_key: row.get("public_key")?,
             host: row.get("host")?,
             port: row.get("port")?,
@@ -25,14 +25,12 @@ pub fn get_ushers(scope: &str) -> Result<Vec<Usher>, anyhow::Error> {
     Ok(ushers_out)
 }
 
-pub fn store_usher(scope: &str, usher: &Usher) -> Result<(), anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
-
+pub fn store_usher(cache: &Connection, scope: &str, usher: &Usher) -> Result<(), anyhow::Error> {
     cache.execute(
-        "INSERT OR REPLACE INTO ushers (scope, name, public_key, host, port, proto, priority) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        "INSERT OR REPLACE INTO ushers (scope, note, public_key, host, port, proto, priority) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
         params![
             scope,
-            usher.name,
+            usher.note,
             usher.public_key,
             usher.host,
             usher.port,
@@ -59,7 +57,7 @@ pub fn build_table(cache: &Connection) -> Result<(), anyhow::Error> {
     cache.execute(
         "CREATE TABLE IF NOT EXISTS ushers (
                 scope TEXT,
-                name TEXT,
+                note TEXT,
                 public_key TEXT,
                 host TEXT,
                 port INTEGER,

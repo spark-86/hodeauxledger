@@ -1,0 +1,9 @@
+{
+    "schema": "rhex://schema/usher-announce@0",
+    "public_key": "Verondu3WufmJWpry4Se0-2J4t4JqrRq0EhQlv3Mv5E",
+    "note": "HodeauxLedger Core Usher",
+    "host": "34.71.60.51",
+    "port": 1984,
+    "proto": "rhex",
+    "priority": 20
+}
