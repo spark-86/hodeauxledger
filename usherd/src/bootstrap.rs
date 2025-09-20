@@ -1,9 +1,11 @@
 use std::{path::PathBuf, str::FromStr, sync::Arc, vec};
 
-use hl_core::{Authority, authority, policy::rule::Rule, to_base64};
+use hl_core::{
+    Authority, Key, authority, keymaster::keymaster::Keymaster, policy::rule::Rule, to_base64,
+};
 use hl_io::{
     db::{self, connect_db, flush_all, head::set_head},
-    fs,
+    fs::{self, authority::load_key_hot},
     screen::print::pretty_print,
     source::RhexSource,
 };
@@ -23,6 +25,14 @@ pub fn bootstrap(listen_args: &ListenArgs) -> Result<(), anyhow::Error> {
 
     // Flushing cache.db
     flush_all(&config.cache_db)?;
+
+    // Create keymaster and load keys
+    println!("Setting up keymaster...");
+    let mut keymaster = Keymaster::new();
+    for key in config.hot_keys.iter() {
+        keymaster.hot_keys.push(Key::from_bytes(*key));
+    }
+
     println!("Loading root scope...");
     let root_dir = PathBuf::from_str(&config.fs_dir)?;
     println!("Loading scope: {:?}", root_dir.to_str());
@@ -68,7 +78,7 @@ pub fn bootstrap(listen_args: &ListenArgs) -> Result<(), anyhow::Error> {
             println!("Loaded rhex with no current_hash");
         }
 
-        let output = process::process_rhex(&rhex, false, &config)?;
+        let output = process::process_rhex(&rhex, false, &config, &keymaster)?;
         for rhex in output {
             pretty_print(&rhex);
         }

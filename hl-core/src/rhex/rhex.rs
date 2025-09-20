@@ -1,8 +1,11 @@
-use crate::rhex::{
-    context::Context,
-    intent::Intent,
-    record_types,
-    signature::{SigType, Signature},
+use crate::{
+    rhex::{
+        context::Context,
+        intent::Intent,
+        record_types,
+        signature::{SigType, Signature},
+    },
+    time::clock::GTClock,
 };
 use serde::{Deserialize, Serialize};
 
@@ -86,6 +89,19 @@ impl Rhex {
         let mut hasher = blake3::Hasher::new();
         ciborium::ser::into_writer(&self.intent, &mut hasher)?; // Hasher: Write
         Ok(*hasher.finalize().as_bytes())
+    }
+
+    /// Add context to the current Rhex
+    pub fn add_context(&mut self, spacial: &Option<(f64, f64, f64, String)>) -> anyhow::Result<()> {
+        let clock = GTClock::new(0);
+        self.context.at = clock.now_micromarks_u64();
+        if let Some((x, y, z, refer)) = spacial {
+            self.context.x = Some(*x);
+            self.context.y = Some(*y);
+            self.context.z = Some(*z);
+            self.context.refer = Some(refer.clone());
+        };
+        Ok(())
     }
 
     /// Preimage for usher (author sig + context)

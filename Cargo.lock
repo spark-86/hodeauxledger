@@ -779,6 +779,7 @@ dependencies = [
  "serde_bytes",
  "serde_json",
  "serde_with",
+ "zeroize",
 ]
 
 [[package]]

@@ -6,6 +6,7 @@ use hl_core::{
         self, E_APPEND_DENIED, E_AUTHOR_KEY_DECODE, E_PREV_HASH_BEHIND_HEAD, E_PREVIOUS_NOT_FOUND,
         E_QUORUM_INSUFFICIENT, E_QUORUM_KEY_DECODE, E_SIG_INVALID, E_SIG_MISSING, E_USHER_MISMATCH,
     },
+    keymaster::keymaster::Keymaster,
     policy::rule::Rule,
     rhex::signature::SigType,
     to_base64,
@@ -354,6 +355,7 @@ fn dispatch_record(
     rhex: &Rhex,
     first_time: bool,
     config: &Arc<Config>,
+    keymaster: &Keymaster,
 ) -> anyhow::Result<Vec<Rhex>> {
     let rt_parts: Vec<&str> = rhex.intent.record_type.split(':').collect();
     match rt_parts.get(0).copied().unwrap_or_default() {
@@ -364,7 +366,7 @@ fn dispatch_record(
         }
         "request" => request::process_request(rhex, first_time, config),
         "scope" => {
-            scope::process_scope(rhex, first_time, config)?;
+            scope::process_scope(rhex, first_time, config, keymaster)?;
             Ok(Vec::new())
         }
         "key" => key::process_key(rhex, &first_time, config),
@@ -380,8 +382,10 @@ pub fn process_rhex(
     rhex: &Rhex,
     first_time: bool,
     config: &Arc<Config>,
+    keymaster: &Keymaster,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
     let cache_conn = connect_db(&config.cache_db)?;
+
     let mut outbound = Vec::new();
     let mut errors = Errors::new();
 
@@ -430,7 +434,7 @@ pub fn process_rhex(
     }
     // 7) Execute or emit error R⬢
     if errors.is_empty() {
-        outbound = dispatch_record(rhex, first_time, config)?;
+        outbound = dispatch_record(rhex, first_time, config, keymaster)?;
     } else {
         // FIXME: from your note: if usher_pk may be zeros, you could choose a hot_key instead.
         let message = errors.join_messages();

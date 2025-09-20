@@ -1,5 +1,6 @@
 use anyhow::bail;
 use ed25519_dalek::Signer;
+use zeroize::Zeroize;
 
 pub struct Key {
     pub sk: Option<[u8; 32]>,
@@ -50,5 +51,15 @@ impl Key {
         let mut sig_bytes = [0u8; 64];
         sig_bytes.copy_from_slice(&signature.to_bytes());
         Ok(sig_bytes)
+    }
+
+    pub fn zero(&self) -> Result<(), anyhow::Error> {
+        if self.sk.is_none() {
+            bail!("Key has no secret key to zero");
+        }
+        // Use zeroize crate to zero out the secret key
+        let mut sk_bytes = self.sk.unwrap();
+        sk_bytes.zeroize();
+        Ok(())
     }
 }

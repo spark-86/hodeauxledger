@@ -47,6 +47,12 @@ pub fn store_scope_full(cache: &Connection, scope: &Scope) -> Result<(), anyhow:
     Ok(())
 }
 
+pub fn scope_exists(cache: &Connection, scope_name: &str) -> Result<bool, anyhow::Error> {
+    let mut stmt = cache.prepare("SELECT 1 FROM scopes WHERE scope = ?1 LIMIT 1")?;
+    let mut rows = stmt.query(params![scope_name])?;
+    Ok(rows.next()?.is_some())
+}
+
 pub fn retrieve_scope(scope_name: &str) -> Result<Scope, anyhow::Error> {
     let cache = connect_db("./ledger/cache/cache.db")?;
 

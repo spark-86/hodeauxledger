@@ -4,6 +4,7 @@ pub mod b64;
 pub mod config;
 pub mod error;
 pub mod key;
+pub mod keymaster;
 pub mod policy;
 pub mod rhex;
 pub mod scope;

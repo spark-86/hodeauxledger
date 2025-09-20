@@ -1,7 +1,7 @@
 use anyhow::Error;
 use bytes::BytesMut;
 use futures::{SinkExt, StreamExt};
-use hl_core::{Config, Rhex};
+use hl_core::{Config, Key, Rhex, keymaster::keymaster::Keymaster};
 use hl_io::net::codec::RhexCodec;
 use hl_services::process;
 use std::sync::Arc;
@@ -99,8 +99,11 @@ async fn handle_conn(
         }
 
         // do your real handling here, using `config` if needed
-
-        let out_rhex = process::process_rhex(&rhex_in, true, &config)?;
+        let mut keymaster = Keymaster::new();
+        for key in config.hot_keys.iter() {
+            keymaster.hot_keys.push(Key::from_bytes(*key));
+        }
+        let out_rhex = process::process_rhex(&rhex_in, true, &config, &keymaster)?;
         //let out_rhex = vec![rhex_in];
 
         for rhex in out_rhex {

@@ -1,5 +1,7 @@
 //! Usher error codes (string constants)
 
+pub mod stack;
+
 /// generic / fallback
 pub const E_INTERNAL: &str = "E_INTERNAL";
 pub const E_UNIMPLEMENTED: &str = "E_UNIMPLEMENTED";
@@ -129,6 +131,7 @@ pub const E_FS_READ: &str = "E_FS_READ";
 pub const E_FS_WRITE: &str = "E_FS_WRITE";
 pub const E_FS_RENAME: &str = "E_FS_RENAME";
 pub const E_FS_FSYNC: &str = "E_FS_FSYNC";
+pub const E_FS_DIR_EXISTS: &str = "E_FS_DIR_EXISTS";
 
 pub const E_CACHE_RHEX: &str = "E_CACHE_RHEX";
 
