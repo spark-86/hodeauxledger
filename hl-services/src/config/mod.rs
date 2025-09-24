@@ -1,4 +1,4 @@
-use hl_core::{Config, Key, config::ConfigFile};
+use hl_core::{Config, config::ConfigFile};
 use hl_io::fs;
 use std::{fs as file_fs, path::Path};
 
@@ -6,12 +6,15 @@ pub fn load_config(path: &str) -> Result<Config, anyhow::Error> {
     let config_str = file_fs::read_to_string(path)?;
     let config_file: ConfigFile = serde_json::from_str(&config_str)?;
 
+    println!("{:?}", config_file);
+
     // Load all the hot keys into memory
     // FIXME: Yes, I'm aware how terrible this is. It's the best
     // I have the energy for right now. Wanna fix it? Be my guest.
     let mut incoming_hot = Vec::new();
     for key in config_file.hot_keys.unwrap_or(vec![]) {
         let hot_key = fs::authority::load_key_hot(&Path::new(&key))?;
+        println!("Loaded key file {}", key);
         incoming_hot.push(hot_key);
     }
 

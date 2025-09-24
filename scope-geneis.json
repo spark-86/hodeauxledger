@@ -1,0 +1,4 @@
+{
+    "schema": "rhex://schema/scope-genesis@0",
+    "note": "This scope is for schema definitions, for global use throughout the crystal."
+}

@@ -21,7 +21,7 @@ async fn main() {
     match parsed.command {
         Commands::Listen(listen_args) => {
             // Bootstrap ourselves into a ledger
-            bootstrap::bootstrap(&listen_args);
+            let _ = bootstrap::bootstrap(&listen_args);
 
             let status = listen::listen(&listen_args, parsed.verbose).await;
             if status.is_err() {

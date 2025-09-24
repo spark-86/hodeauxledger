@@ -1,11 +1,9 @@
 use std::{path::PathBuf, str::FromStr, sync::Arc, vec};
 
-use hl_core::{
-    Authority, Key, authority, keymaster::keymaster::Keymaster, policy::rule::Rule, to_base64,
-};
+use hl_core::{Key, keymaster::keymaster::Keymaster, policy::rule::Rule};
 use hl_io::{
     db::{self, connect_db, flush_all, head::set_head},
-    fs::{self, authority::load_key_hot},
+    fs::{self},
     screen::print::pretty_print,
     source::RhexSource,
 };
@@ -80,9 +78,10 @@ pub fn bootstrap(listen_args: &ListenArgs) -> Result<(), anyhow::Error> {
 
         let output = process::process_rhex(&rhex, false, &config, &keymaster)?;
         for rhex in output {
-            pretty_print(&rhex);
+            let _ = pretty_print(&rhex);
         }
         set_head(&cache, "", &head)?;
     }
+    println!("Bootstrap complete.");
     Ok(())
 }

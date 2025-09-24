@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr, sync::Arc};
 use hl_core::{Config, Rhex, Usher};
 use hl_io::{
     db::{self, connect_db},
-    fs,
+    fs::{self, rhex::DirSink},
     sink::RhexSink,
 };
 
@@ -41,10 +41,12 @@ pub fn usher_appoint(
         rhex,
         &vec!["h".to_string(), "host".to_string(), "🏠".to_string()],
     )?;
-    let port = get_data_u64(
+    usher.port = get_data_u64(
         rhex,
         &vec!["p".to_string(), "port".to_string(), "🚪".to_string()],
-    )?;
+    )?
+    .try_into()
+    .unwrap();
     let pk_str = get_data_string(
         rhex,
         &vec!["pk".to_string(), "public_key".to_string(), "🔓".to_string()],
@@ -72,6 +74,10 @@ pub fn usher_demote(
     first_time: bool,
     config: &Arc<Config>,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
-    print!("[🛰️:🔴]");
+    if first_time {
+        let mut dir_sink = DirSink::new(PathBuf::from_str(&config.fs_dir)?);
+        dir_sink.send(rhex)?;
+    }
+    print!("[🛰️:🔴]=~=");
     Ok(Vec::new())
 }

@@ -142,7 +142,6 @@ pub async fn listen(listen_args: &ListenArgs, verbose: bool) -> Result<(), Error
     } else {
         &"config.json".to_string()
     };
-
     let config = Arc::new(hl_services::config::load_config(config_file)?); // ← wrap in Arc
 
     let listener = setup_listener(host, port).await?;

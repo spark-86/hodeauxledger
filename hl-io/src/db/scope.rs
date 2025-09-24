@@ -1,4 +1,4 @@
-use hl_core::{policy::rule, scope::scope::Scope};
+use hl_core::scope::scope::Scope;
 use rusqlite::{Connection, params};
 
 use crate::db::connect_db;

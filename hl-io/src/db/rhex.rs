@@ -1,5 +1,5 @@
+use crate::sink::RhexSink;
 use crate::source::RhexSource;
-use crate::{db::connect_db, sink::RhexSink};
 use hl_core::{Context, Intent, Rhex};
 use rusqlite::{Connection, params};
 

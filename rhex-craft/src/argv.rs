@@ -69,4 +69,7 @@ pub struct ValidateArgs {
 pub struct ViewArgs {
     #[arg(short, long)]
     pub input: String,
+
+    #[arg(short, long)]
+    pub base64: bool,
 }

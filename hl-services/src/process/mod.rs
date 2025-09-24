@@ -25,6 +25,7 @@ mod policy;
 mod record;
 mod request;
 mod scope;
+mod scope_request;
 mod usher;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,7 +83,9 @@ fn validate_basic_intent(
 ) {
     // previous_hash must exist unless genesis
     if rhex.intent.previous_hash.is_none()
-        && (rhex.intent.record_type != "scope:genesis" && rhex.intent.record_type != "request:rhex")
+        && (rhex.intent.record_type != "scope:genesis"
+            && rhex.intent.record_type != "request:rhex"
+            && rhex.intent.record_type != "request:head")
     {
         errors.push(
             error::E_PREVIOUS_HASH_MISSING,
@@ -205,7 +208,7 @@ fn usher_is_ours(config: &Config, usher_pk: &[u8; 32]) -> bool {
 }
 
 fn verify_usher_context(rhex: &Rhex, config: &Config, errors: &mut Errors) {
-    println!("{:?}", config.hot_keys);
+    //println!("{:?}", config.hot_keys);
     if usher_is_ours(config, &rhex.intent.usher_pk) {
         return; // good: we're the usher
     }
@@ -358,10 +361,10 @@ fn dispatch_record(
     keymaster: &Keymaster,
 ) -> anyhow::Result<Vec<Rhex>> {
     let rt_parts: Vec<&str> = rhex.intent.record_type.split(':').collect();
-    match rt_parts.get(0).copied().unwrap_or_default() {
+    let status = match rt_parts.get(0).copied().unwrap_or_default() {
         "policy" => policy::process_policy(rhex, first_time, config),
         "record" => {
-            record::process_record(rhex, first_time)?;
+            record::process_record(rhex, first_time, config)?;
             Ok(Vec::new())
         }
         "request" => request::process_request(rhex, first_time, config),
@@ -372,6 +375,12 @@ fn dispatch_record(
         "key" => key::process_key(rhex, &first_time, config),
         "usher" => usher::process_usher(rhex, first_time, config),
         _ => anyhow::bail!("Invalid record type"),
+    };
+    if status.is_err() {
+        println!("Dispatch error: {:?}", status.as_ref().err());
+        Err(status.err().unwrap())
+    } else {
+        Ok(status.unwrap())
     }
 }
 
@@ -434,7 +443,13 @@ pub fn process_rhex(
     }
     // 7) Execute or emit error R⬢
     if errors.is_empty() {
-        outbound = dispatch_record(rhex, first_time, config, keymaster)?;
+        let status = dispatch_record(rhex, first_time, config, keymaster);
+        match status {
+            Ok(mut vec) => outbound.append(&mut vec),
+            Err(e) => {
+                println!("Dispatch error: {:?}", e);
+            }
+        }
     } else {
         // FIXME: from your note: if usher_pk may be zeros, you could choose a hot_key instead.
         let message = errors.join_messages();
