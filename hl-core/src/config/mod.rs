@@ -9,6 +9,7 @@ pub struct Config {
     pub data_dir: String,
     pub cache_db: String,
     pub hot_keys: Vec<[u8; 32]>,
+    pub verbose: bool,
 }
 
 impl Config {
@@ -21,6 +22,7 @@ impl Config {
             data_dir: "".to_string(),
             cache_db: "".to_string(),
             hot_keys: Vec::new(),
+            verbose: false,
         }
     }
 }
@@ -35,4 +37,5 @@ pub struct ConfigFile {
     pub cache_db: Option<String>,
     pub hot_keys: Option<Vec<String>>,
     pub cold_keys: Option<Vec<String>>,
+    pub verbose: Option<bool>,
 }

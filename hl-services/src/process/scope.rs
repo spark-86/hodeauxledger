@@ -21,6 +21,7 @@ pub fn process_scope(
     match rhex.intent.record_type.as_str() {
         "scope:genesis" => scope_genesis(rhex, first_time, &cache),
         "scope:request" => scope_request(rhex, first_time, config, keymaster),
+        "scope:create" => scope_create(rhex, first_time, config, keymaster),
         _ => {
             return Err(anyhow::anyhow!(
                 "Unsupported record type for scope processing"
@@ -82,6 +83,23 @@ fn scope_genesis(
         // scope:request.
 
         // For where this gets written to the fs, see scope:request
+    }
+    Ok(Vec::new())
+}
+
+pub fn scope_create(
+    rhex: &Rhex,
+    first_time: bool,
+    config: &Arc<Config>,
+    keymaster: &Keymaster,
+) -> Result<Vec<Rhex>, anyhow::Error> {
+    print!("[🌐:🟢]=~=");
+    if !first_time {
+        // Prolly should load a scope here. Not sure yet.
+        let _ = rhex;
+        let _ = first_time;
+        let _ = config;
+        let _ = keymaster;
     }
     Ok(Vec::new())
 }

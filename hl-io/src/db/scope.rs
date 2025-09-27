@@ -53,9 +53,7 @@ pub fn scope_exists(cache: &Connection, scope_name: &str) -> Result<bool, anyhow
     Ok(rows.next()?.is_some())
 }
 
-pub fn retrieve_scope(scope_name: &str) -> Result<Scope, anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
-
+pub fn retrieve_scope(cache: &Connection, scope_name: &str) -> Result<Scope, anyhow::Error> {
     let mut stmt = cache.prepare("SELECT scope, role, last_synced FROM scopes WHERE scope = ?1")?;
     let mut rows = stmt.query(params![scope_name])?;
 

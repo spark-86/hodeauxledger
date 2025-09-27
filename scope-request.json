@@ -1,5 +1,19 @@
 {
     "schema": "rhex://schema/scope-request@0",
     "new_scope": "schema",
-    "genesis": "pGVtYWdpY0ZSSEVYAABmaW50ZW50p21wcmV2aW91c19oYXNo9mVzY29wZWZzY2hlbWFlbm9uY2VwRHBVQ2xxdTZzZkRTYVpqcGlhdXRob3JfcGtYIEnIf5K5L6igVeT8ARMSiOItpNHTBv96JOReN-VZ6nmDaHVzaGVyX3BrWCBJyH-SuS-ooFXk_AETEojiLaTR0wb_eiTkXjflWep5g2tyZWNvcmRfdHlwZW1zY29wZTpnZW5lc2lzZGRhdGGiZG5vdGV4TFRoaXMgc2NvcGUgaXMgZm9yIHNjaGVtYSBkZWZpbml0aW9ucywgZm9yIGdsb2JhbCB1c2UgdGhyb3VnaG91dCB0aGUgY3J5c3RhbC5mc2NoZW1heB1yaGV4Oi8vc2NoZW1hL3Njb3BlLWdlbmVzaXNAMGdjb250ZXh0pWJhdABhePZhefZhevZlcmVmZXL2anNpZ25hdHVyZXOBo2hzaWdfdHlwZWZBdXRob3JqcHVibGljX2tleVggSch_krkvqKBV5PwBExKI4i2k0dMG_3ok5F435VnqeYNjc2lnWEDMAbPMAx2Oz30VR9vQ6pgZoPTLvLYOl4V_04ElBHmrDGrNaB9l1JzN4ZbhJ1XZCjoReSfwIqKFNaweDXKXlkQO"
+    "genesis_key": "Sch_krkvqKBV5PwBExKI4i2k0dMG_3ok5F435VnqeYM",
+    "ushers": [
+        {
+            "host": "34.71.60.51",
+            "port": 1984,
+            "proto": "rhex",
+            "priority": 20
+        },
+        {
+            "host": "34.132.79.74",
+            "port": 1984,
+            "proto": "rhex",
+            "priority": 20
+        }
+    ]
 }

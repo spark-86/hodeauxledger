@@ -26,6 +26,7 @@ pub fn load_config(path: &str) -> Result<Config, anyhow::Error> {
         data_dir: config_file.data_dir.unwrap_or("./data".to_string()),
         cache_db: config_file.cache_db.unwrap_or("./cache.db".to_string()),
         hot_keys: incoming_hot,
+        verbose: config_file.verbose.unwrap_or(false),
     };
     Ok(config)
 }

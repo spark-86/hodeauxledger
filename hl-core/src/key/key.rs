@@ -2,6 +2,7 @@ use anyhow::bail;
 use ed25519_dalek::Signer;
 use zeroize::Zeroize;
 
+#[derive(Clone)]
 pub struct Key {
     pub sk: Option<[u8; 32]>,
     pub pk: Option<[u8; 32]>,
@@ -61,5 +62,13 @@ impl Key {
         let mut sk_bytes = self.sk.unwrap();
         sk_bytes.zeroize();
         Ok(())
+    }
+
+    pub fn public_key_bytes(&self) -> Result<[u8; 32], anyhow::Error> {
+        if self.pk.is_some() {
+            Ok(self.pk.unwrap())
+        } else {
+            bail!("Key has no public key")
+        }
     }
 }

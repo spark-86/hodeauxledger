@@ -51,6 +51,7 @@ pub const E_APPEND_ROLES_EMPTY: &str = "E_APPEND_ROLES_EMPTY";
 pub const E_APPEND_DENIED: &str = "E_APPEND_DENIED";
 pub const E_ROLE_QUORUM_DUP_KEYS: &str = "E_ROLE_QUORUM_DUP_KEYS"; // duplicate signer used to fake quorum
 pub const E_USHER_SELF_SIGNATURE_BLOCKED: &str = "E_USHER_SELF_SIGNATURE_BLOCKED"; // policy forbids author==usher
+pub const E_NO_SIGNATURES: &str = "E_NO_SIGNATURES";
 
 //// ───────────────────────── Cryptographic Validation ───────────────────
 
@@ -95,6 +96,7 @@ pub const E_NONCE_MISSING: &str = "E_NONCE_MISSING";
 pub const E_NONCE_REUSED: &str = "E_NONCE_REUSED";
 pub const E_NONCE_UNAVALIBLE: &str = "E_NONCE_UNAVALIBLE";
 pub const E_DUPLICATE_SIGNATURE: &str = "E_DUPLICATE_SIGNATURE";
+pub const E_SPACIAL_MISSING: &str = "E_SPACIAL_MISSING";
 
 //// ───────────────────────── Chain / Ledger Semantics ───────────────────
 

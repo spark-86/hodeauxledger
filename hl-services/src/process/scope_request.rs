@@ -124,12 +124,12 @@ pub fn scope_request(
                         )
                         .into(),
                 });
+                create_rhex.finalize()?;
                 println!("Writing to disk... {}", parent_scope);
                 let mut dir_sink = DirSink::new(PathBuf::from_str(&parent_scope)?);
                 dir_sink.send(&rhex)?;
                 dir_sink.send(&create_rhex)?;
                 let mut cache_sink = CacheSink::new(config.cache_db.clone());
-                cache_sink.send(&rhex)?;
                 cache_sink.send(&create_rhex)?;
             }
 

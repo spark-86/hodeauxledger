@@ -1,8 +1,6 @@
 use hl_core::Policy;
 use rusqlite::{Connection, params};
 
-use crate::db::connect_db;
-
 pub fn store_policy(cache: &Connection, scope: &str, policy: &Policy) -> Result<(), anyhow::Error> {
     let status = cache.execute(
         "INSERT OR REPLACE INTO policies (scope, quorum_ttl, eff, exp, note) VALUES (?1, ?2, ?3, ?4, ?5)",
@@ -31,8 +29,7 @@ pub fn store_policy_full(
     Ok(())
 }
 
-pub fn retrieve_policy(scope: &str) -> Result<Policy, anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn retrieve_policy(cache: &Connection, scope: &str) -> Result<Policy, anyhow::Error> {
     let mut stmt =
         cache.prepare("SELECT quorum_ttl, eff, exp, note FROM policies WHERE scope = ?1")?;
     let mut rows = stmt.query(params![scope])?;

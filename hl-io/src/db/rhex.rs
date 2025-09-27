@@ -1,6 +1,6 @@
 use crate::sink::RhexSink;
 use crate::source::RhexSource;
-use hl_core::{Context, Intent, Rhex};
+use hl_core::{Context, Intent, Rhex, b64::b64::from_base64_to_32};
 use rusqlite::{Connection, params};
 
 pub struct CacheSource {
@@ -159,6 +159,24 @@ pub fn flush_rhex(cache: &Connection) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
+pub fn get_last_append(
+    cache: &Connection,
+    scope: &str,
+    author_pk: &[u8; 32],
+    record_type: &str,
+) -> Result<Option<(u64, [u8; 32])>, anyhow::Error> {
+    let mut stmt = cache.prepare("SELECT current_hash, at FROM rhex WHERE scope = ?1 AND author_pk = ?2 AND record_type = ?3 ORDER BY at DESC LIMIT 1")?;
+    let mut rows = stmt.query(params![scope, author_pk, record_type])?;
+    if let Some(row) = rows.next()? {
+        let at: u64 = row.get("at")?;
+        let current_hash: String = row.get("current_hash")?;
+        let current_hash = from_base64_to_32(&current_hash)?;
+        Ok(Some((at, current_hash)))
+    } else {
+        Ok(None)
+    }
+}
+
 pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS rhex (
@@ -172,7 +190,7 @@ pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
                 at INTEGER,
                 spacial TEXT,
                 signatures TEXT,
-                PRIMARY KEY (previous_hash)
+                PRIMARY KEY (previous_hash, scope)
             )",
         [],
     )?;
