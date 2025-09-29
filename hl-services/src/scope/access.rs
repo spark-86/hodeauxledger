@@ -1,7 +1,13 @@
 use hl_io::db;
+use rusqlite::Connection;
 
-pub fn can_access(scope: &str, key: &[u8; 32], record_type: &str) -> Result<bool, anyhow::Error> {
-    let rules = db::rule::get_rules(scope)?;
+pub fn can_access(
+    cache: &Connection,
+    scope: &str,
+    key: &[u8; 32],
+    record_type: &str,
+) -> Result<bool, anyhow::Error> {
+    let rules = db::rule::get_rules(cache, scope)?;
 
     let authorities = db::authority::get_authorities(scope)?;
 

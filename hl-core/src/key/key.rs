@@ -71,4 +71,13 @@ impl Key {
             bail!("Key has no public key")
         }
     }
+
+    pub fn verify(&self, hash: &[u8; 32], signature: &[u8; 64]) -> Result<bool, anyhow::Error> {
+        if self.pk.is_none() {
+            bail!("Key has no public key for verification");
+        }
+        let pk = ed25519_dalek::VerifyingKey::from_bytes(&self.pk.unwrap())?;
+        let sig = ed25519_dalek::Signature::from_bytes(signature);
+        Ok(pk.verify_strict(hash, &sig).is_ok())
+    }
 }

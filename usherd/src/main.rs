@@ -1,9 +1,10 @@
 use clap::Parser;
 
-use crate::argv::Commands;
+use crate::{argv::Commands, httpd::start_http_server};
 
 mod argv;
 mod bootstrap;
+mod httpd;
 mod listen;
 mod rebuild;
 
@@ -22,12 +23,14 @@ async fn main() {
         Commands::Listen(listen_args) => {
             // Bootstrap ourselves into a ledger
             let _ = bootstrap::bootstrap(&listen_args);
-
+            let http_server_handle = tokio::spawn(start_http_server(listen_args.clone()));
             let status = listen::listen(&listen_args, parsed.verbose).await;
             if status.is_err() {
+                http_server_handle.abort();
                 println!("Error: {:?}", status.err().unwrap());
                 std::process::exit(1);
             } else {
+                http_server_handle.abort();
                 std::process::exit(0);
             }
         }

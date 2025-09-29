@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
-use hl_core::{Config, Rhex, error, keymaster::keymaster::Keymaster};
+use hl_core::{Config, Rhex, error, keymaster::keymaster::Keymaster, to_base64};
 use hl_io::db;
 
 use crate::{
     build,
     process::processor::{
         errors::Errors,
+        signatures::{signature_check_quorum, signature_quorum, signature_usher_and_quorum},
         validation::{
             validate_context_at, validate_context_spacial, validate_current_hash,
             validate_intent_author_pk, validate_intent_data, validate_intent_nonce,
@@ -18,6 +19,7 @@ use crate::{
 
 mod dispatch;
 mod errors;
+mod schema;
 mod signatures;
 mod validation;
 
@@ -27,11 +29,15 @@ pub fn process_rhex(
     config: &Arc<Config>,
     keymaster: &Keymaster,
 ) -> Result<Vec<Rhex>, anyhow::Error> {
-    let rhex = &rhex.clone();
     let mut outbound: Vec<Rhex> = Vec::new();
     let verbose = config.verbose;
     let mut errors = Errors::new();
     let cache = db::connect_db(&config.cache_db)?;
+
+    if verbose {
+        let ph_b64 = to_base64(&rhex.intent.previous_hash.unwrap_or([0u8; 32]));
+        print!("Processing R⬢ [⬅️🧬:{},🌐:{}]", ph_b64, rhex.intent.scope);
+    }
 
     // Magic
     validate_magic(rhex, &mut errors)?;
@@ -48,7 +54,7 @@ pub fn process_rhex(
 
     // Context
     if rhex.signatures.len() > 1 {
-        validate_context_at(rhex, &mut errors, &cache)?;
+        validate_context_at(rhex, &mut errors, &cache, first_time)?;
         validate_context_spacial(rhex, &mut errors)?;
     }
 
@@ -60,32 +66,48 @@ pub fn process_rhex(
         1 => {
             // We should have an author sig and be looking for usher sig
             // and first quorum
+            let mut out_rhex = rhex.clone();
+            signature_usher_and_quorum(&mut out_rhex, &mut errors, keymaster)?;
+            outbound.push(out_rhex);
         }
         2 => {
             // We're looking for quorum. We're not gonna match usher_pk,
             // but we should know who they are
+            let mut out_rhex = rhex.clone();
+            signature_quorum(&mut out_rhex, &mut errors, keymaster)?;
+            outbound.push(out_rhex)
         }
         _ => {
             // 3+, we have full quorum, we are looking to append. Make sure
             // we are usher_pk and are a write authority for this scope.
+            // signature_check_quorum()
+            signature_check_quorum(rhex, &mut errors, &cache)?;
         }
     }
 
     // Current Hash
-    validate_current_hash(rhex, &mut errors)?;
+    if rhex.current_hash.is_some() {
+        validate_current_hash(rhex, &mut errors)?;
+    }
+    if rhex.signatures.len() != 1 && rhex.current_hash.is_none() {
+        errors.push(
+            error::E_HASH_MISSING,
+            "Expected 1 signature for initial Rhex, but found multiple without a current_hash.",
+        );
+    }
 
     // All done checking the R⬢ for stability. Either
     // process or show the list of errors.
     if errors.is_empty() {
         if verbose {
-            println!("[✅] Rhex passed validation");
+            print!("[✅ R⬢ Valid]");
         };
         outbound.append(&mut dispatch::dispatch(
             rhex, first_time, config, &keymaster,
         )?);
     } else {
         if verbose {
-            println!("[❌] Rhex failed validation:");
+            print!("[❌ R⬢ Invalid]");
             for (e, m) in errors.stack.iter().zip(errors.messages.iter()) {
                 println!(" - {}: {}", e, m);
             }

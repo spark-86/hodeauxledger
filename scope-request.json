@@ -13,7 +13,7 @@
             "host": "34.132.79.74",
             "port": 1984,
             "proto": "rhex",
-            "priority": 20
+            "priority": 40
         }
     ]
 }

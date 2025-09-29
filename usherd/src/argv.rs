@@ -19,7 +19,7 @@ pub enum Commands {
     Rebuild(RebuildArgs),
 }
 
-#[derive(Args, Debug)]
+#[derive(Args, Debug, Clone)]
 pub struct ListenArgs {
     #[arg(short, long)]
     pub port: String,

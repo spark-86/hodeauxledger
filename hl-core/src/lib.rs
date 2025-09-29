@@ -7,6 +7,7 @@ pub mod key;
 pub mod keymaster;
 pub mod policy;
 pub mod rhex;
+pub mod schema;
 pub mod scope;
 pub mod time;
 pub mod usher;

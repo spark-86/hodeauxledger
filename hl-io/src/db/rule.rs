@@ -28,8 +28,7 @@ pub fn store_rule(cache: &Connection, scope: &str, rule: &Rule) -> Result<(), an
     Ok(())
 }
 
-pub fn get_rules(scope: &str) -> Result<Vec<Rule>, anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
+pub fn get_rules(cache: &Connection, scope: &str) -> Result<Vec<Rule>, anyhow::Error> {
     let mut stmt = cache.prepare(
         "SELECT record_types, append_roles, quorum_k, quorum_roles, rate_per_mark 
         FROM rules WHERE scope = ?1",

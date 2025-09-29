@@ -52,6 +52,7 @@ pub const E_APPEND_DENIED: &str = "E_APPEND_DENIED";
 pub const E_ROLE_QUORUM_DUP_KEYS: &str = "E_ROLE_QUORUM_DUP_KEYS"; // duplicate signer used to fake quorum
 pub const E_USHER_SELF_SIGNATURE_BLOCKED: &str = "E_USHER_SELF_SIGNATURE_BLOCKED"; // policy forbids author==usher
 pub const E_NO_SIGNATURES: &str = "E_NO_SIGNATURES";
+pub const E_QUORUM_INVALID_MEMBER: &str = "E_QUORUM_INVALID_MEMBER";
 
 //// ───────────────────────── Cryptographic Validation ───────────────────
 
@@ -90,6 +91,7 @@ pub const E_RECORD_TYPE_UNKNOWN: &str = "E_RECORD_TYPE_UNKNOWN";
 pub const E_RECORD_TOO_LARGE: &str = "E_RECORD_TOO_LARGE";
 pub const E_INTENT_MISSING: &str = "E_INTENT_MISSING";
 pub const E_DATA_SCHEMA_INVALID: &str = "E_DATA_SCHEMA_INVALID";
+pub const E_SCHEMA_CONSTRAINT_VIOLATION: &str = "E_SCHEMA_CONSTRAINT_VIOLATION";
 pub const E_CONTEXT_SPACIAL_PARSE: &str = "E_CONTEXT_SPACIAL_PARSE";
 pub const E_CONTEXT_REFER_INVALID: &str = "E_CONTEXT_REFER_INVALID";
 pub const E_NONCE_MISSING: &str = "E_NONCE_MISSING";

@@ -190,6 +190,7 @@ pub fn build_table(conn: &Connection) -> Result<(), anyhow::Error> {
                 at INTEGER,
                 spacial TEXT,
                 signatures TEXT,
+                current_hash TEXT,
                 PRIMARY KEY (previous_hash, scope)
             )",
         [],

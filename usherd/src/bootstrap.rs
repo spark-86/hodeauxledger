@@ -76,7 +76,15 @@ pub fn bootstrap(listen_args: &ListenArgs) -> Result<(), anyhow::Error> {
             println!("Loaded rhex with no current_hash");
         }
 
-        let output = process::process_rhex(&rhex, false, &config, &keymaster)?;
+        let output = process::process_rhex(&rhex, false, &config, &keymaster);
+        let output = match output {
+            Ok(o) => o,
+            Err(e) => {
+                println!("Error processing rhex: {:?}", e);
+                break;
+            }
+        };
+        println!("");
         for rhex in output {
             let _ = pretty_print(&rhex);
         }

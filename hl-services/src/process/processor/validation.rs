@@ -1,8 +1,14 @@
-use hl_core::{Rhex, error, keymaster::keymaster::Keymaster, time::clock::GTClock};
+use hl_core::{
+    Policy, Rhex, error, keymaster::keymaster::Keymaster, policy::rule::Rule,
+    rhex::record_types::is_valid_record_type, time::clock::GTClock,
+};
 use hl_io::db;
 use rusqlite::Connection;
 
-use crate::process::{data::get_data_string, processor::errors::Errors};
+use crate::process::{
+    data::get_data_string,
+    processor::{errors::Errors, schema::get_schema},
+};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -21,13 +27,23 @@ pub fn validate_intent_previous_hash(
     current_hash: [u8; 32],
     errors: &mut Errors,
 ) -> Result<(), anyhow::Error> {
-    if rhex.intent.previous_hash.is_none() {
+    if rhex.intent.previous_hash.is_none()
+        && rhex.intent.record_type != "scope:genesis"
+        && !rhex.intent.record_type.starts_with("request:")
+    {
         errors.push(
             error::E_PREVIOUS_HASH_MISSING,
             "rhex.intent.previous_hash missing",
         );
         return Err(anyhow::anyhow!("rhex.intent.previous_hash missing"));
     }
+    // NOTE: This needs to be set up to handle scope:genesis and
+    // request:* because those never have a previous hash
+
+    if rhex.intent.previous_hash.is_none() {
+        return Ok(());
+    }
+
     let prev_hash = rhex.intent.previous_hash.unwrap();
     if prev_hash != current_hash {
         errors.push(
@@ -43,42 +59,19 @@ pub fn validate_intent_previous_hash(
 
 /// Validate that the `scope` name is valid
 static SCOPE_REGEX: Lazy<Regex> = Lazy::new(|| {
-    regex::Regex::new(r"^(?:|(?=.{1,65535}$)([a-zA-Z0-9-]{1,64})(\.[a-zA-Z0-9-]{1,64})*)$")
-        .expect("Invalid scope regex")
+    regex::Regex::new(
+        r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?))*$"
+    ).expect("Invalid scope regex")
 });
 
-/// Validate that the `scope` name is valid
-///
-/// This regex is designed to allow for hierarchical scope names,
-/// similar to domain names or file paths, but with specific character
-/// restrictions.
-///
-/// - `^`: Asserts the start of the string.
-/// - `(?=.{1,65535}$)`: A positive lookahead assertion that ensures the
-///   entire string (the scope name) has a length between 1 and 65535 characters.
-///   This is a practical limit to prevent excessively long scope names.
-/// - `([a-zA-Z0-9-]{1,64})`: Matches a single "segment" of the scope name.
-///   A segment consists of:
-///     - `[a-zA-Z0-9-]`: Alphanumeric characters and hyphens.
-///     - `{1,64}`: Each segment must be between 1 and 64 characters long.
-/// - `(\.[a-zA-Z0-9-]{1,64})*`: Allows for zero or more additional segments,
-///   each preceded by a dot (`.`). This enables hierarchical naming (e.g., `org.example.project`).
-/// - `$`: Asserts the end of the string.
-///
-/// Examples of valid scope names:
-/// - `my-scope`
-/// - `org.example.project`
-/// - `a.b.c.d`
-/// - `scope123`
-///
-/// Examples of invalid scope names:
-/// - `my_scope` (contains underscore)
-/// - `my.scope.` (ends with a dot)
-/// - `.my.scope` (starts with a dot)
-/// - `my..scope` (contains consecutive dots)
-/// - `a-very-long-scope-name-that-exceeds-sixty-four-characters-in-a-single-segment`
-/// - `a.b.c.d.e.f.g.h.i.j.k.l.m.n.o.p.q.r.s.t.u.v.w.x.y.z.a.b.c.d.e.f.g.h.
+/// Verify scope name is valid via regex
 fn scope_regex(scope: &str) -> bool {
+    if scope.is_empty() {
+        return true; // root scope is valid
+    }
+    if scope.len() > 65535 {
+        return false;
+    }
     SCOPE_REGEX.is_match(scope)
 }
 
@@ -153,6 +146,10 @@ pub fn validate_intent_usher_pk(
         errors.push(error::E_USHER_MISMATCH, "rhex.intent.usher_pk invalid");
         return Err(anyhow::anyhow!("rhex.intent.usher_pk invalid"));
     }
+    if is_us.is_ok() {
+        // We are the usher, so we are valid
+        return Ok(());
+    }
     Err(anyhow::anyhow!("rhex.intent.usher_pk not known"))
 }
 
@@ -163,18 +160,44 @@ pub fn validate_intent_record_type(
     cache: &Connection,
 ) -> Result<(), anyhow::Error> {
     // validate that the author has permission to append this record type
+    let valid = is_valid_record_type(&rhex.intent.record_type);
+    if !valid {
+        errors.push(
+            error::E_RECORD_TYPE_UNKNOWN,
+            "rhex.intent.record_type is not a valid record type",
+        );
+        return Err(anyhow::anyhow!(
+            "rhex.intent.record_type is not a valid record type"
+        ));
+    };
     let policy = db::policy::retrieve_policy(&cache, &rhex.intent.scope);
-    match &policy {
-        Ok(_) => {}
-        Err(e) => {
-            errors.push(
-                error::E_POLICY_MISSING,
-                format!("No policy found for scope {}: {}", &rhex.intent.scope, e),
-            );
-            return Err(anyhow::anyhow!("No policy found for scope"));
+    let policy = match policy {
+        Ok(mut policy) => {
+            let rules = db::rule::get_rules(cache, &rhex.intent.scope);
+            if rules.is_err() {
+                policy
+            } else {
+                policy.rules = rules.unwrap();
+                policy
+            }
         }
-    }
-    let policy = policy.unwrap();
+        Err(_) => {
+            let mut rule = Rule::new(&rhex.intent.scope);
+            rule.append_roles = vec!["authority".to_string()];
+            rule.record_types = vec!["scope:genesis".to_string()];
+            rule.quorum_k = 1;
+            rule.quorum_roles = vec!["authority".to_string()];
+            rule.rate_per_mark = 1;
+            Policy {
+                scope: rhex.intent.scope.clone(),
+                quorum_ttl: 1000000000,
+                eff: None,
+                exp: None,
+                note: Some("Default Scope Policy".to_string()),
+                rules: vec![rule],
+            }
+        }
+    };
     let record_type = &rhex.intent.record_type;
     let mut last_rule = None;
     for rule in policy.rules.iter() {
@@ -223,13 +246,49 @@ pub fn validate_intent_data(rhex: &Rhex, errors: &mut Errors) -> Result<(), anyh
     // I'm tired as fuck and this doesn't affect append so we're skipping
     // it for now.
     let schema = get_data_string(rhex, &vec!["sch".to_string(), "schema".to_string()]);
+    // If an error, that just means we have no schema, which is fine
     if schema.is_err() {
-        errors.push(
-            error::E_DATA_SCHEMA_INVALID,
-            "rhex.intent.data does not match schema",
-        );
-        return Err(anyhow::anyhow!("rhex.intent.data does not match schema"));
+        return Ok(());
     }
+    let schema = schema.unwrap();
+
+    // Load schema from cache
+    let loaded_schema = get_schema(&schema);
+    if loaded_schema.is_err() {
+        // FIXME: This is kind of an area of contention. Should schema
+        // silently fail? It kind of has to until we get the schema
+        // scope fully populated.
+    } else {
+        // Verify the schema we did get.
+        let loaded_schema = loaded_schema.unwrap();
+        for constraint in loaded_schema.constraints {
+            let data_value = rhex.intent.data.get(constraint.name.clone());
+            if constraint.required == 1 && data_value.is_none() {
+                errors.push(
+                    error::E_SCHEMA_CONSTRAINT_VIOLATION,
+                    format!(
+                        "Schema constraint violation: {} is required",
+                        constraint.name
+                    ),
+                );
+                return Err(anyhow::anyhow!(
+                    "Schema constraint violation: {} is required",
+                    constraint.name
+                ));
+            } else if constraint.required == 0 && data_value.is_none() {
+                // Not required, so it's fine if it's missing
+                continue;
+            } else if constraint.required == 0 && data_value.is_some() {
+                // Not required, but present. Validate it.
+                // TODO: Add type validation here
+                continue;
+            } else if constraint.required == 1 && data_value.is_some() {
+                // Required and present. Validate it.
+                // TODO: Add type validation here
+            }
+        }
+    }
+
     Ok(())
 }
 
@@ -239,9 +298,10 @@ pub fn validate_context_at(
     rhex: &Rhex,
     errors: &mut Errors,
     cache: &Connection,
+    first_time: bool,
 ) -> Result<(), anyhow::Error> {
     // If we are looking for quorum we give a shit, otherwise, keep moving
-    if rhex.signatures.len() != 2 {
+    if rhex.signatures.len() > 2 && first_time {
         let policy = db::policy::retrieve_policy(&cache, &rhex.intent.scope)?;
         let quorum_ttl = policy.quorum_ttl;
         let clock = GTClock::new(0);
@@ -256,6 +316,21 @@ pub fn validate_context_at(
             );
             return Err(anyhow::anyhow!("Quorum TTL exceeded"));
         }
+    } else if rhex.signatures.len() == 1 && first_time {
+        // If it's the first signature, we set the `at` field.
+        // We don't validate it.
+        // This is where the `at` field is set.
+    } else if rhex.context.at == 0
+        && rhex.intent.scope != "scope:genesis"
+        && rhex.intent.scope != ""
+    {
+        errors.push(
+            error::E_TIME_ANCHOR_MISSING,
+            "rhex.context.at missing for non-first signature",
+        );
+        return Err(anyhow::anyhow!(
+            "rhex.context.at missing for non-first signature"
+        ));
     }
     Ok(())
 }
