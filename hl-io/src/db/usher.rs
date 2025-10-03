@@ -3,11 +3,10 @@ use rusqlite::{Connection, params};
 
 use crate::db::connect_db;
 
-pub fn get_ushers(scope: &str) -> Result<Vec<Usher>, anyhow::Error> {
-    let cache = connect_db("./ledger/cache/cache.db")?;
-
-    let mut stmt =
-        cache.prepare("SELECT name, host, port, proto, priority FROM ushers WHERE scope = ?1")?;
+pub fn get_ushers(cache: &Connection, scope: &str) -> Result<Vec<Usher>, anyhow::Error> {
+    let mut stmt = cache.prepare(
+        "SELECT note, public_key, host, port, proto, priority FROM ushers WHERE scope = ?1",
+    )?;
     let mut rows = stmt.query(params![scope])?;
 
     let mut ushers_out = vec![];

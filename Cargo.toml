@@ -45,3 +45,4 @@ regex = "1.11"
 subtle = "2"
 once_cell = "1.21"
 axum = "0.8"
+tower-http = { version = "0.6", features = ["cors"] }

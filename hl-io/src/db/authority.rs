@@ -1,10 +1,7 @@
 use hl_core::{Authority, Key};
 use rusqlite::{Connection, params};
 
-use crate::db::connect_db;
-
-pub fn get_authorities(scope: &str) -> Result<Vec<Authority>, anyhow::Error> {
-    let conn = connect_db("./ledger/cache/cache.db")?;
+pub fn get_authorities(conn: &Connection, scope: &str) -> Result<Vec<Authority>, anyhow::Error> {
     let mut stmt =
         conn.prepare("SELECT key, roles, eff, exp, note FROM authorities WHERE scope = ?1")?;
     let mut rows = stmt.query([scope])?;

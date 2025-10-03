@@ -15,6 +15,7 @@ pub fn process_request(
     match rhex.intent.record_type.as_str() {
         "request:rhex" => request_rhex(rhex, first_time, config),
         "request:head" => request_head(rhex, first_time, config),
+        "request:scope" => request_scope(rhex, first_time, config),
         _ => Err(anyhow::anyhow!(
             "Unsupported record type for request processing"
         )),
@@ -101,6 +102,54 @@ pub fn request_head(
             println!("No records found for scope {}", parent_scope);
             Ok(Vec::new())
         }
+    } else {
+        Ok(Vec::new())
+    }
+}
+
+pub fn request_scope(
+    rhex: &Rhex,
+    first_time: bool,
+    config: &Arc<Config>,
+) -> Result<Vec<Rhex>, anyhow::Error> {
+    if first_time {
+        println!("[📥:🌐]=~= Getting scope request...");
+        let mut keymaster = Keymaster::new();
+        keymaster.load_keys(&config.hot_keys)?;
+        let parent_scope = rhex.intent.scope.clone();
+
+        let cache = hl_io::db::connect_db(&config.cache_db)?;
+        let mut scope_data = hl_io::db::scope::retrieve_scope(&cache, &parent_scope)?;
+        let ushers = hl_io::db::usher::get_ushers(&cache, &parent_scope)?;
+        let authorities = hl_io::db::authority::get_authorities(&cache, &parent_scope)?;
+        let policy = hl_io::db::policy::retrieve_policy(&cache, &parent_scope)?;
+
+        scope_data.ushers = ushers;
+        scope_data.authorities = authorities;
+        scope_data.policy = Some(policy);
+
+        let mut return_rhex = Rhex::new();
+        return_rhex.intent = Intent {
+            previous_hash: rhex.current_hash,
+            scope: parent_scope.clone(),
+            nonce: Intent::gen_nonce(),
+            author_pk: rhex.intent.usher_pk, // requester’s usher becomes author
+            usher_pk: rhex.intent.author_pk, // we usher on their behalf
+            record_type: "scope".to_string(),
+            data: serde_json::to_value(&scope_data)?,
+        };
+        return_rhex.context = Context::from_at(GTClock::new(0).now_micromarks_u64());
+
+        let key_bytes = keymaster.get_matching(&return_rhex.intent.author_pk)?;
+        let key = Key::from_bytes(key_bytes);
+        let signature = Signature {
+            sig_type: SigType::Author,
+            public_key: return_rhex.intent.author_pk,
+            sig: key.sign(&return_rhex.author_hash()?)?,
+        };
+        return_rhex.signatures.push(signature);
+
+        Ok(vec![return_rhex])
     } else {
         Ok(Vec::new())
     }

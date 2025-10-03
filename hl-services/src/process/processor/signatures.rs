@@ -161,7 +161,7 @@ pub fn signature_check_quorum(
     }
 
     // Make sure each sig is in the list of quorum members
-    let authorities = db::authority::get_authorities(&rhex.intent.scope)?;
+    let authorities = db::authority::get_authorities(&cache, &rhex.intent.scope)?;
     for sig in quorum_sigs.iter() {
         let quorum_pk = sig.public_key;
         for auth in authorities.iter() {

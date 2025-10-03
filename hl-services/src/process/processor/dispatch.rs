@@ -22,5 +22,9 @@ pub fn dispatch(
             "Unsupported record type for dispatch processing"
         )),
     };
+    if out_rhex.is_err() {
+        eprintln!("Error processing rhex: {:?}", out_rhex.err());
+        return Ok(Vec::new());
+    }
     Ok(out_rhex.unwrap())
 }

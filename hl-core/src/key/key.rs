@@ -2,7 +2,7 @@ use anyhow::bail;
 use ed25519_dalek::Signer;
 use zeroize::Zeroize;
 
-#[derive(Clone)]
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
 pub struct Key {
     pub sk: Option<[u8; 32]>,
     pub pk: Option<[u8; 32]>,

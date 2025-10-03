@@ -9,7 +9,7 @@ pub fn can_access(
 ) -> Result<bool, anyhow::Error> {
     let rules = db::rule::get_rules(cache, scope)?;
 
-    let authorities = db::authority::get_authorities(scope)?;
+    let authorities = db::authority::get_authorities(cache, scope)?;
 
     let mut roles = Vec::new();
     for authority in authorities {

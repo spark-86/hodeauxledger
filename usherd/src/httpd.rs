@@ -18,13 +18,37 @@ struct AppendRequest {
 #[derive(Serialize)]
 struct AppendResponse {
     ok: bool,
+    rhex: Option<Vec<Rhex>>,
     current_hash: Option<String>,
     error: Option<String>,
 }
 
-async fn process(rhex: &Rhex, _args: Arc<ListenArgs>) -> anyhow::Result<Rhex> {
+async fn process(rhex: &Rhex, args: Arc<ListenArgs>) -> anyhow::Result<Vec<Rhex>> {
     // Do nothing for now
-    Ok(rhex.clone())
+    use hl_core::{Key, keymaster::keymaster::Keymaster};
+    use hl_services::{config::load_config, process as hl_process};
+
+    let config_file = &args.config;
+    let config_file = if config_file.is_some() {
+        config_file.as_ref().unwrap()
+    } else {
+        &"config.json".to_string()
+    };
+    let config = Arc::new(load_config(config_file)?);
+
+    let mut keymaster = Keymaster::new();
+    for key in config.hot_keys.iter() {
+        keymaster.hot_keys.push(Key::from_bytes(*key));
+    }
+
+    let processed_rhex = hl_process::process_rhex(rhex, true, &config, &keymaster)?;
+    // For now, we assume only one Rhex is returned
+    // In a real scenario, you might need to handle multiple Rhex outputs
+    if processed_rhex.len() == 0 {
+        Err(anyhow::anyhow!("No Rhex returned from processing"))
+    } else {
+        Ok(processed_rhex)
+    }
 }
 
 async fn append_handler(
@@ -37,6 +61,7 @@ async fn append_handler(
         Err(e) => {
             return Json(AppendResponse {
                 ok: false,
+                rhex: None,
                 current_hash: None,
                 error: Some(format!("base64 decode error: {e}")),
             });
@@ -49,6 +74,7 @@ async fn append_handler(
         Err(e) => {
             return Json(AppendResponse {
                 ok: false,
+                rhex: None,
                 current_hash: None,
                 error: Some(format!("CBOR decode error: {e}")),
             });
@@ -59,16 +85,17 @@ async fn append_handler(
     match process(&rhex, listen_args).await {
         Ok(r) => {
             // serialize hash back to base64
-            let hash_b64 = r.current_hash.clone().map(|h| to_base64(h.as_ref()));
 
             Json(AppendResponse {
                 ok: true,
-                current_hash: hash_b64,
+                current_hash: None,
+                rhex: Some(r),
                 error: None,
             })
         }
         Err(e) => Json(AppendResponse {
             ok: false,
+            rhex: None,
             current_hash: None,
             error: Some(e.to_string()),
         }),
@@ -78,9 +105,15 @@ async fn append_handler(
 pub async fn start_http_server(listen_args: ListenArgs) {
     let shared = Arc::new(listen_args);
 
+    let cors = tower_http::cors::CorsLayer::new()
+        .allow_origin(tower_http::cors::Any)
+        .allow_methods(tower_http::cors::Any)
+        .allow_headers(tower_http::cors::Any);
+
     let app = Router::new()
         .route("/append", post(append_handler))
-        .with_state(shared);
+        .with_state(shared)
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:1978").await.unwrap();
     println!(

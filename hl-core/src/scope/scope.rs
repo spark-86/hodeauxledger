@@ -2,6 +2,7 @@ use std::fmt::{self, Display};
 
 use crate::{Authority, Usher, policy::policy::Policy};
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Scope {
     pub name: String,
     pub role: ScopeRoles,
@@ -11,6 +12,7 @@ pub struct Scope {
     pub ushers: Vec<Usher>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub enum ScopeRoles {
     Authority = 0,
     Mirror = 1,

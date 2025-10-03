@@ -1,4 +1,4 @@
-pub const RECORD_TYPES: [&str; 28] = [
+pub const RECORD_TYPES: [&str; 29] = [
     "scope:genesis",
     "scope:request",
     "scope:create",
@@ -22,6 +22,7 @@ pub const RECORD_TYPES: [&str; 28] = [
     "request:head",
     "request:policy",
     "request:aliases",
+    "request:scope",
     "steward:info",
     "steward:warning",
     "steward:error",

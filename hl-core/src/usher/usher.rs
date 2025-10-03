@@ -1,3 +1,4 @@
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct Usher {
     pub note: String,
     pub public_key: [u8; 32],

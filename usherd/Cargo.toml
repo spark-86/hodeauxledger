@@ -14,6 +14,8 @@ axum.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 ciborium.workspace = true
+tower-http.workspace = true
+
 
 hl-core = { path = "../hl-core" }
 hl-io = { path = "../hl-io" }
